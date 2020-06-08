@@ -1,0 +1,6 @@
+version: '3'
+services:
+  discordbot:
+    environment:
+      NODE_ENV: 'production'
+    command: npm run prod
