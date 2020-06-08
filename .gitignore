@@ -3,3 +3,4 @@ node_modules/
 aliaslist.json
 built/
 .DS_Store
+backup.sql
