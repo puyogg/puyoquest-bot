@@ -97,7 +97,7 @@ async function sendCardEmbed(
   if (cardData.lst) {
     em.addField(`[LS+] ${cardData.lst} (${cardData.jplst})`, cardData.lste);
   } else if (cardData.lste) {
-    em.addField(`[LS+] ${cardData.ls} (+) (${cardData.jpls}(+))`, cardData.lste);
+    em.addField(`[LS+] ${cardData.name} SP (${cardData.jpname} SP)`, cardData.lste);
   }
 
   if (cardData.lst2) em.addField(`[LS+] ${cardData.lst2} (${cardData.jplst2})`, cardData.lst2e);
