@@ -95,7 +95,7 @@ export default {
         // .then((sentMessage) => console.log(sentMessage))
         .then(() => {
           message.channel
-            .awaitMessages(filter, { max: 1, time: 1000 * 60, errors: ['time'] })
+            .awaitMessages(filter, { max: 1, time: 2 * 1000 * 60, errors: ['time'] })
             .then((collected) => {
               const firstUser = collected.first();
               if (!firstUser) return; // no user
