@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import * as Discord from 'discord.js';
-import { Card, parseTemplateText, getTemplateValue } from './parser';
+import { getTemplateValue } from './parser';
 import * as leven from 'leven';
 import { DateTime } from 'luxon';
 import { db } from '../db';

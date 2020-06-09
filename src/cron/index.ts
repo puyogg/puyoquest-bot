@@ -21,7 +21,7 @@ async function initCron(): Promise<void> {
   if (process.env.NODE_ENV === 'production') {
     // Rebuild card index every 24 hours or on boot.
     (async function buildCardIndex(): Promise<void> {
-      console.log('Building card index...');
+      console.log('Building live card index...');
       await Wiki.buildCardIndex().catch((e) => console.error(e));
       console.log('Finished building card index.');
       setTimeout(buildCardIndex, 86400000);

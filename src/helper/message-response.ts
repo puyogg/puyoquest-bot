@@ -42,6 +42,15 @@ async function sendCardEmbed(
   const rawText = await Wiki.getRawCardData(fullCardID);
   if (!rawText) {
     message.channel.send(`Error: ${name} is not available in rarity: ★${rarity}`);
+    const rawText = await fetch(`https://puyonexus.com/wiki/Template:${fullCardID}?action=raw`)
+      .then((res) => {
+        if (res.status === 200) {
+          return res.text();
+        }
+      })
+      .then((data) => data)
+      .catch((e) => console.error(e));
+    console.log('rawText', rawText);
     return;
   }
 
