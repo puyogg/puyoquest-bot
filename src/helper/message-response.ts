@@ -95,7 +95,7 @@ async function sendCardEmbed(
   if (thumbnailURL) em.setThumbnail(thumbnailURL);
 
   // Leader skills
-  if (cardData.ls) {
+  if (cardData.ls || cardData.lse) {
     em.addField(
       `[LS] ${cardData.ls}${(cardData.lslv && ` Lv. ${cardData.lslv}`) || ''} (${cardData.jpls}${
         (cardData.lslv && ` Lv. ${cardData.lslv}`) || ''
@@ -115,7 +115,7 @@ async function sendCardEmbed(
   if (cardData.lst2) em.addField(`[LS+] ${cardData.lst2} (${cardData.jplst2})`, cardData.lst2e);
   if (cardData.lst3) em.addField(`[LS+] ${cardData.lst3} (${cardData.jplst3})`, cardData.lst3e);
 
-  if (cardData.as) {
+  if (cardData.as || cardData.ase) {
     em.addField(
       `[AS] ${cardData.as}${(cardData.aslv && ` Lv. ${cardData.aslv}`) || ''} (${cardData.jpas}${
         (cardData.aslv && ` Lv. ${cardData.aslv}`) || ''
