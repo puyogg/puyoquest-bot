@@ -73,8 +73,8 @@ const command: Command = {
       indexData.linkName &&
       indexData.rarestid
     ) {
-      console.log('Found the card in the card index.');
-      console.log('Index Data', indexData);
+      // console.log('Found the card in the card index.');
+      // console.log('Index Data', indexData);
       if (rarity) {
         sendCardEmbed(message, indexData.id, indexData.name, indexData.linkName, rarity);
       } else {
