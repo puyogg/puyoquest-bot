@@ -81,7 +81,7 @@ const command: Command = {
         sendRarityEmbed(message, indexData.id, indexData.name, indexData.linkName, indexData.rarestid);
       }
     } else {
-      console.log(`Couldn't find the card in the card index.`);
+      // console.log(`Couldn't find the card in the card index.`);
       // Update the name if it leads to a redirect
       const redirectName = await Wiki.checkCharRedirect(
         name
