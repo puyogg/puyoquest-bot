@@ -1,4 +1,5 @@
 import * as Discord from 'discord.js';
+import fetch from 'node-fetch';
 import { getFullCardID, parseTemplateText } from '../wiki/parser';
 import { Wiki } from '../wiki/api';
 
