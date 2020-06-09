@@ -597,7 +597,7 @@ class Wiki {
     const filePages = await Wiki.getFilesOnPage(pageTitle);
     if (!filePages || filePages.length === 0) return;
     const fullArts = filePages
-      .filter((file) => /l\.png|r\.png|ss.png/.test(file))
+      .filter((file) => /l\.png|\sr\.png|\_r\.png|ss.png/.test(file))
       .map((file) => file.replace(/\s/g, '_'));
 
     const fullArtData: FullArtData = {};

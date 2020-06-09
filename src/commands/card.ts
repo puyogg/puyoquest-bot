@@ -65,13 +65,23 @@ const command: Command = {
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, ''),
     );
-    if (indexData && indexData.id && indexData.name && indexData.linkName && indexData.rarestid) {
+    if (
+      indexData &&
+      indexData.id &&
+      indexData.id !== '0000' &&
+      indexData.name &&
+      indexData.linkName &&
+      indexData.rarestid
+    ) {
+      console.log('Found the card in the card index.');
+      console.log('Index Data', indexData);
       if (rarity) {
         sendCardEmbed(message, indexData.id, indexData.name, indexData.linkName, rarity);
       } else {
         sendRarityEmbed(message, indexData.id, indexData.name, indexData.linkName, indexData.rarestid);
       }
     } else {
+      console.log(`Couldn't find the card in the card index.`);
       // Update the name if it leads to a redirect
       const redirectName = await Wiki.checkCharRedirect(
         name
@@ -104,6 +114,10 @@ const command: Command = {
         return;
       }
 
+      // console.log(`couldn't find the card in the card index.`);
+      // console.log('Char ID', charID);
+      // console.log('Name', name);
+      // console.log('Redirectname', redirectName);
       if (rarity) {
         sendCardEmbed(message, charID, name, name.replace(/\s/g, '_'), rarity);
       } else {

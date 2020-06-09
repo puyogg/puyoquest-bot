@@ -37,11 +37,13 @@ async function sendCardEmbed(
   linkName: string,
   rarity: string,
 ): Promise<void> {
+  // console.log(id, rarity);
   const fullCardID = getFullCardID(id, rarity);
 
   // Try to retrieve card page from wiki.
   const rawText = await Wiki.getRawCardData(fullCardID);
   if (!rawText) {
+    // console.log(fullCardID);
     message.channel.send(`Error: ${name} is not available in rarity: ★${rarity}`);
     const rawText = await fetch(`https://puyonexus.com/wiki/Template:${fullCardID}?action=raw`)
       .then((res) => {
