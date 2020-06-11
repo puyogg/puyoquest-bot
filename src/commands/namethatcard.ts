@@ -24,7 +24,10 @@ export default {
       }
 
       // Only give Xin Hartmann lol
-      if (message.author.username.toLowerCase().includes('xin')) {
+      const member = message.member;
+      if (!member) return;
+      const username = member.displayName;
+      if (username.toLowerCase().includes('xin')) {
         randCard.id = '4203';
         randCard.name = 'Hartmann?';
       }
