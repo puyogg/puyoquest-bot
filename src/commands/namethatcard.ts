@@ -23,6 +23,12 @@ export default {
         return;
       }
 
+      // Only give Xin Hartmann lol
+      if (message.author.username.toLowerCase().includes('xin')) {
+        randCard.id = '4203';
+        randCard.name = 'Hartmann?';
+      }
+
       // Get art and name from a random rarity
       const rarities = await Wiki.getCharRaritiesFromID(randCard.id);
       if (!rarities) {
