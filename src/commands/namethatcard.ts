@@ -7,6 +7,20 @@ import { db } from '../db';
 
 const name = path.parse(__filename).name;
 
+interface ColorToString {
+  [key: string]: string;
+}
+
+const colorHex: ColorToString = {
+  red: '#df1111',
+  blue: '#1346df',
+  green: '#109b08',
+  yellow: '#fa9d0e',
+  purple: '#991ad9',
+};
+
+const colorHexes = [colorHex.red, colorHex.blue, colorHex.green, colorHex.yellow, colorHex.purple];
+
 export default {
   name: name, // ntc
   usage: ['ntc [stop]'],
@@ -74,6 +88,11 @@ export default {
 
       const em = new Discord.MessageEmbed();
       em.setImage(imgURL);
+      const colorNum = parseInt(fullID[0], 10);
+      if (!isNaN(colorNum)) {
+        const colorInd = colorNum - 1;
+        em.setColor(colorHexes[colorInd]);
+      }
       const filter: Discord.CollectorFilter = (response: Discord.Message) => {
         // Also need to look up alias database later.
         // https://stackoverflow.com/questions/990904/remove-accents-diacritics-in-a-string-in-javascript
