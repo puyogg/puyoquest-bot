@@ -14,7 +14,7 @@ export default {
   args: true,
   aliases: ['ntc'],
   category: ['puyoquest'],
-  async execute(message: Discord.Message, args: string[]): Promise<void> {
+  async execute(message: Discord.Message): Promise<void> {
     const attempts = 5;
     for (let i = 0; i < attempts; i++) {
       const randCard = await Wiki.getRandomCard();
@@ -105,13 +105,38 @@ export default {
         .then(() => {
           message.channel
             .awaitMessages(filter, { max: 1, time: 2 * 1000 * 60, errors: ['time'] })
-            .then((collected) => {
+            .then(async (collected) => {
               const firstUser = collected.first();
               if (!firstUser) return; // no user
               const member = message.guild?.member(firstUser.author);
-              const username = member?.displayName;
+              if (!member) return; // no member
+              const username = member.displayName;
 
               message.channel.send(`${username} got it correct! The card is ${name} [★${randRarity}] (${jpname}).`);
+
+              // Add value to database
+              const guild = message.guild;
+              if (!guild) {
+                message.channel.send(`There was a problem updating your score on the leaderboard though.`);
+                return;
+              }
+              db.none(
+                `INSERT INTO ntc_leaderboard (user_id, server_id, correct)
+                VALUES ($[userID], $[serverID], 1)
+                ON CONFLICT (user_id)
+                DO UPDATE SET correct = ntc_leaderboard.correct + 1 WHERE ntc_leaderboard.user_id = $[userID]
+                RETURNING correct`,
+                {
+                  userID: member.id,
+                  serverID: guild.id,
+                },
+              )
+                // .then((data) => {
+                //   message.channel.send(`Successfully updated score?`);
+                //   console.log(data);
+                //   return data;
+                // })
+                .catch((e) => console.error(e));
             })
             .catch(() => {
               message.channel.send(`The above card was: ${name} [★${randRarity}] (${jpname}).`);

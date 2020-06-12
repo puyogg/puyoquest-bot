@@ -23,3 +23,9 @@ CREATE TABLE IF NOT EXISTS bound_messages (
   message_id text,
   purpose text
 );
+
+CREATE TABLE IF NOT EXISTS ntc_leaderboard (
+  user_id text PRIMARY KEY,
+  server_id text,
+  correct integer
+);
