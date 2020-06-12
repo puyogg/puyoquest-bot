@@ -138,7 +138,7 @@ export default {
               db.none(
                 `INSERT INTO ntc_leaderboard (user_id, server_id, correct)
                 VALUES ($[userID], $[serverID], 1)
-                ON CONFLICT (user_id)
+                ON CONFLICT (user_id, server_id)
                 DO UPDATE SET correct = ntc_leaderboard.correct + 1 WHERE ntc_leaderboard.user_id = $[userID]`,
                 {
                   userID: member.id,
