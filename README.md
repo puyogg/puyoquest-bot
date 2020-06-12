@@ -1,32 +1,82 @@
+# puyoquest-bot
+
+A multi-server Discord bot for [Puyo Puyo Quest](http://puyopuyoquest.sega-net.com/), a Japanese mobile game by SEGA. The bot can retrieve art and character data from the [Puyo Nexus Wiki](https://puyonexus.com/wiki/PPQ:Portal).
+
+[<img src="https://i.imgur.com/jtqI1Fs.png">](https://puyonexus.com/wiki/PPQ:Steam_City_Arle/%E2%98%857)
+
+The bot is written in TypeScript and runs on Node.js, in a Docker container, with a PostgreSQL database to store server settings and a leaderboard.
+
+## Adding the bot to a server
+
+You can add my fork of the bot, "Yotarou", to your server with this link: https://discord.com/oauth2/authorize?client_id=589483071384977447&scope=bot
+
 ## Command List
 
-| Command          | Alias | Usage                         | Description                                                                                        |
-|------------------|-------|-------------------------------|----------------------------------------------------------------------------------------------------|
-| ?card            | ?c    | ?c  [rarity#]                 | Get a card's rarities, or supply a rarity to get full details.                                     |
-| ?fullart         | ?fa   | ?fa  [rarity#]                | Request a card's full body art. Includes any asymmetrical and Full Power art.                      |
-| ?alias           | ?a    | ?a AliasName >> CharacterName | Alias a name to a character. Only usable on the EPPC Discord.                                      |
-| ?aliaslist       | ?al   | ?al [alias\|name]             | View the aliases available for a character.                                                        |
-| ?aliasdelete     | ?ad   | ?ad [alias]                   | Remove an alias. Only usable on the EPPC Discord.                                                  |
-| ?namethatcard    | ?ntc  | ?ntc                          | Play "Name that card!".                                                                            |
-| ?ntc-leaderboard | ?ntcl | ?ntcl                         | List the top 10 ntc players on the server.                                                         |
-| ?page            | ?p    | ?p [pageName]                 | Get a link to the Puyo Quest wiki. If page title is supplied, the bot will link to the PPQ Portal. |
-| ?pageseries      | ?ps   | ?ps [pageSeries]              | Get a link to a card series.                                                                       |
+| Command          | Alias | Usage                         | Description                                                                                             |
+| ---------------- | ----- | ----------------------------- | ------------------------------------------------------------------------------------------------------- |
+| ?card            | ?c    | ?c [rarity#]                  | Get a card's rarities, or supply a rarity to get full details.                                          |
+| ?fullart         | ?fa   | ?fa [rarity#]                 | Request a card's full body art. Includes any asymmetrical and Full Power art.                           |
+| ?alias           | ?a    | ?a AliasName >> CharacterName | Alias a name to a character. Only usable on the EPPC Discord.                                           |
+| ?aliaslist       | ?al   | ?al [alias\|name]             | View the aliases available for a character.                                                             |
+| ?aliasdelete     | ?ad   | ?ad [alias]                   | Remove an alias. Only usable on the EPPC Discord.                                                       |
+| ?namethatcard    | ?ntc  | ?ntc                          | Play "Name that card!".                                                                                 |
+| ?ntc-leaderboard | ?ntcl | ?ntcl                         | List the top 10 ntc players on the server.                                                              |
+| ?page            | ?p    | ?p [pageName]                 | Get a link to the Puyo Quest wiki. If a page title isn't supplied, the bot will link to the PPQ Portal. |
+| ?pageseries      | ?ps   | ?ps [pageSeries]              | Get a link to a card series.                                                                            |
+
+## Installing a clone of the bot
+
+### Environment setup
+
+You'll need an `.env` file with these variables:
+
+```bash
+# Your Discord Bot's Token.
+BOT_TOKEN=ABCD1234...
+
+# Insert your chosen login info for the Postgres DB
+POSTGRES_USER=username
+POSTGRES_PASSWORD=password
+POSTGRES_DB=discordbot
+
+# Prefix to call commands with in chat.
+BOT_PREFIX=?
+```
+
+Some of the scripts in [package.json](package.json) rely on Unix commands, so I recommend running the project on Linux/macOS or [WSL2](https://docs.microsoft.com/en-us/windows/wsl/about).
+
+### Development mode
+
+```bash
+docker-compose build
+docker-compose up -d # Run the bot with ts-node
+```
+
+### Production mode
+
+```bash
+docker-compose build
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d # Compile JS & run in node
+```
 
 ## Planned Features
 
-* Group reminders
-* Card combination look up
-* Card Recognition? Check out TensorFlow
+- Group reminders
+- Card combination look up
+- Card Recognition? Set this up with TensorFlow?
 
-## Notes for myself... 
 ### Backing up PostgreSQL Database
-* Backing up PostgreSQL while it's running in a container.
+
+- Backing up PostgreSQL while it's running in a container.
+
 ```bash
-docker exec yotarou-bot_postgres_1 pg_dump -U <POSTGRES_USERNAME> <DATABASE_NAME> > backup.sql
+docker exec <postgres_container_name> pg_dump -U <POSTGRES_USERNAME> <DATABASE_NAME> > backup.sql
 ```
+
 The `backup.sql` file is saved outside of the container.
 
-* Restoring:
+- Restoring:
+
 ```bash
 docker exec -i <postgres_container_name> psql -U <POSTGRES_USERNAME> -d <DATABASE_NAME> < backup.sql
 ```
