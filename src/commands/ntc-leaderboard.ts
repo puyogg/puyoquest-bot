@@ -36,7 +36,7 @@ export default {
       const correct: number = row['correct'];
       const user = guild.member(userID);
       let userName = '?';
-      if (user) userName = user.nickname || '?';
+      if (user) userName = user.displayName || '?';
       return {
         userName: userName,
         correct: correct,
