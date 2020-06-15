@@ -42,6 +42,22 @@ interface Card {
   jplst: string;
   jplst2: string;
   jplst3: string;
+  bs: string;
+  jpbs: string;
+  bslv: string;
+  bsn: string;
+  bse: string;
+  combin1: string;
+  combin2: string;
+  combin3: string;
+  combin4: string;
+  combin5: string;
+  ss: string;
+  jpss: string;
+  sslv: string;
+  ssstart: string;
+  ssend: string;
+  sse: string;
 }
 
 interface BackAST {
@@ -170,13 +186,14 @@ async function parseSkillText(text: string): Promise<string> {
   wikitext = wikitext.replace(/(?<= \[\/wiki\/Category:PPQ:).*?(?=_Combination])/g, '');
   wikitext = wikitext.replace(/ \[\/wiki\/Category\:PPQ\:\_Combination\]/g, '');
   wikitext = wikitext.replace(/(?<=\[).*?(?=])/g, '');
+  wikitext = wikitext.replace(/\[\]/g, '');
 
   for (let i = 0; i < strs.length; i++) {
     if (!wikitext.includes('[')) return wikitext;
     const str = strs[i];
     wikitext = wikitext.replace(new RegExp(str.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'), 'g'), wikiTextToEmoji[str]);
   }
-  return wikitext;
+  return wikitext.trim();
 }
 
 /**
@@ -184,7 +201,7 @@ async function parseSkillText(text: string): Promise<string> {
  * For an example, see https://puyonexus.com/wiki/Template:229907?action=raw
  */
 async function parseTemplateText(text: string): Promise<Card> {
-  // Ignore first two lines
+  // Ignore first line
   const data = text.slice(text.indexOf('\n'));
 
   // Split on \n
@@ -232,6 +249,22 @@ async function parseTemplateText(text: string): Promise<Card> {
     jplst: getCardTemplateValue(rows, 'jplst'),
     jplst2: getCardTemplateValue(rows, 'jplst2'),
     jplst3: getCardTemplateValue(rows, 'jplst3'),
+    bs: getCardTemplateValue(rows, 'bs'),
+    jpbs: getCardTemplateValue(rows, 'jpbs'),
+    bslv: getCardTemplateValue(rows, 'bslv'),
+    bsn: getCardTemplateValue(rows, 'bsn'),
+    bse: getCardTemplateValue(rows, 'bse', true),
+    combin1: getCardTemplateValue(rows, 'combin1', true),
+    combin2: getCardTemplateValue(rows, 'combin2', true),
+    combin3: getCardTemplateValue(rows, 'combin3', true),
+    combin4: getCardTemplateValue(rows, 'combin4', true),
+    combin5: getCardTemplateValue(rows, 'combin5', true),
+    ss: getCardTemplateValue(rows, 'ss'),
+    jpss: getCardTemplateValue(rows, 'jpss'),
+    sslv: getCardTemplateValue(rows, 'sslv'),
+    ssstart: getCardTemplateValue(rows, 'ssstart'),
+    ssend: getCardTemplateValue(rows, 'ssend'),
+    sse: getCardTemplateValue(rows, 'sse', true),
   };
 
   // Check for backast (Powerpro-kun)
@@ -315,7 +348,7 @@ async function parseTemplateText(text: string): Promise<Card> {
     });
   }
 
-  // Parse wiki text of ase and lse
+  // Parse wiki text of ase, lse, and bse
   if (cardData.ase) cardData.ase = await parseSkillText(cardData.ase);
   if (cardData.asfe) cardData.asfe = await parseSkillText(cardData.asfe);
   if (cardData.aste) cardData.aste = await parseSkillText(cardData.aste);
@@ -325,6 +358,8 @@ async function parseTemplateText(text: string): Promise<Card> {
   if (cardData.lste) cardData.lste = await parseSkillText(cardData.lste);
   if (cardData.lst2e) cardData.lst2e = await parseSkillText(cardData.lst2e);
   if (cardData.lst3e) cardData.lst3e = await parseSkillText(cardData.lst3e);
+  if (cardData.bse) cardData.bse = await parseSkillText(cardData.bse);
+  if (cardData.sse) cardData.sse = await parseSkillText(cardData.sse);
 
   return cardData;
 }

@@ -2,6 +2,7 @@ import * as Discord from 'discord.js';
 import fetch from 'node-fetch';
 import { getFullCardID, parseTemplateText } from '../wiki/parser';
 import { Wiki } from '../wiki/api';
+import { DateTime } from 'luxon';
 
 interface ColorToString {
   [key: string]: string;
@@ -21,6 +22,19 @@ const colorHex: ColorToString = {
   yellow: '#fa9d0e',
   purple: '#991ad9',
 };
+
+function parseTime(timeStr: string): DateTime {
+  const [year, month, day] = timeStr.split('/').map((num) => parseInt(num, 10));
+
+  const time = DateTime.fromObject({
+    year: year,
+    month: month,
+    day: day,
+    zone: 'Asia/Tokyo',
+  });
+
+  return time;
+}
 
 /**
  * Reply with an embed containing a specific card's data.
@@ -148,6 +162,50 @@ async function sendCardEmbed(
       `[AS+] ${cardData.ast3} (${cardData.jpast3}) [${activationPuyo[cardData.color.toLowerCase()]}×${cardData.astn}]`,
       cardData.ast3e,
     );
+
+  if (cardData.bs || cardData.bse) {
+    em.addField(
+      `[BS] ${cardData.bs}${(cardData.bslv && ` Lv. ${cardData.bslv}`) || ''} (${cardData.jpbs}${
+        (cardData.bslv && ` Lv. ${cardData.bslv}`) || ''
+      }) [${activationPuyo[cardData.color.toLowerCase()]}×${cardData.bsn}]`,
+      cardData.bse,
+    );
+  }
+
+  // Check if ss skill is still active.
+  if (cardData.ssend && (cardData.ss || cardData.sse) && parseTime(cardData.ssend) > time) {
+    em.addField(
+      `[SS] ${cardData.ss}${(cardData.sslv && ` Lv. ${cardData.sslv}`) || ''} (${cardData.jpss}${
+        (cardData.sslv && ` Lv. ${cardData.sslv}`) || ''
+      })`,
+      `Date: ${cardData.ssstart} ~ ${cardData.ssend}\n` + cardData.sse,
+    );
+  }
+
+  const cardSeries = await Wiki.getCardSeries(id);
+
+  if (cardSeries) {
+    const link = `[${cardSeries}](https://puyonexus.com/wiki/Category:PPQ:${cardSeries.replace(/\s/g, '_')})`;
+    em.addField('Series', link, true);
+  } else {
+    em.addField('Series', 'None', true);
+  }
+
+  const combinations: string[] = [];
+  if (cardData.combin1) combinations.push(cardData.combin1);
+  if (cardData.combin2) combinations.push(cardData.combin2);
+  if (cardData.combin3) combinations.push(cardData.combin3);
+  if (cardData.combin4) combinations.push(cardData.combin4);
+  if (cardData.combin5) combinations.push(cardData.combin5);
+
+  const combinationLinks = combinations.map((combination) => {
+    return `[${combination}](https://puyonexus.com/wiki/Category:PPQ:${combination.replace(
+      /\s/g,
+      '_',
+    )}_Combination/Cards)`;
+  });
+
+  em.addField('Combinations', combinationLinks.join(', '), true);
 
   message.channel.send(em);
 }

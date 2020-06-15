@@ -21,6 +21,8 @@ const colorHex: ColorToString = {
 
 const colorHexes = [colorHex.red, colorHex.blue, colorHex.green, colorHex.yellow, colorHex.purple];
 
+const ntcCalls = new Discord.Collection<string, boolean>();
+
 export default {
   name: name, // ntc
   usage: ['ntc [stop]'],
@@ -29,6 +31,11 @@ export default {
   aliases: ['ntc'],
   category: ['puyoquest'],
   async execute(message: Discord.Message): Promise<void> {
+    // Don't use ntc if it was called recently.
+    const guild = message.guild;
+    if (guild && ntcCalls.has(guild.id)) return;
+
+    // Look up card from card index, up to 5 times in case of error.
     const attempts = 5;
     for (let i = 0; i < attempts; i++) {
       const randCard = await Wiki.getRandomCard();
@@ -89,11 +96,22 @@ export default {
         const colorInd = colorNum - 1;
         em.setColor(colorHexes[colorInd]);
       }
+
+      let cancelResponse = false;
+
       const filter: Discord.CollectorFilter = (response: Discord.Message) => {
-        // Also need to look up alias database later.
+        if (response.content.trim().replace(/\s\s+/g, ' ').toLowerCase() === process.env.BOT_PREFIX + 'ntc stop') {
+          cancelResponse = true;
+          message.channel.send(`The card is ${name} [★${randRarity}] (${jpname}).`);
+          const guild = message.guild;
+          if (!guild) return false;
+          ntcCalls.delete(guild.id);
+          return false;
+        }
+
         // https://stackoverflow.com/questions/990904/remove-accents-diacritics-in-a-string-in-javascript
         const correct =
-          aliases.includes(response.content.toLowerCase()) ||
+          aliases.includes(response.content.trim().toLowerCase()) ||
           name
             .trim()
             .normalize('NFD')
@@ -114,48 +132,58 @@ export default {
               .toLowerCase();
         return correct;
       };
-      message.channel
-        .send('Who is this card?', em)
-        // .then((sentMessage) => console.log(sentMessage))
-        .then(() => {
-          message.channel
-            .awaitMessages(filter, { max: 1, time: 2 * 1000 * 60, errors: ['time'] })
-            .then(async (collected) => {
-              const firstUser = collected.first();
-              if (!firstUser) return; // no user
-              const member = message.guild?.member(firstUser.author);
-              if (!member) return; // no member
-              const username = member.displayName;
+      message.channel.send('Who is this card?', em).then(() => {
+        // Add a value to the ntcCalls Map so that it can't get called again.
+        const guild = message.guild;
+        if (!guild) return;
+        ntcCalls.set(guild.id, true);
 
-              message.channel.send(`${username} got it correct! The card is ${name} [★${randRarity}] (${jpname}).`);
+        message.channel
+          .awaitMessages(filter, { max: 1, time: 2 * 1000 * 60, errors: ['time'] })
+          .then(async (collected) => {
+            // Cancel response if ntc stop was mentioned earlier.
+            if (cancelResponse) return;
+            const firstUser = collected.first();
 
-              // Add value to database
-              const guild = message.guild;
-              if (!guild) {
-                message.channel.send(`There was a problem updating your score on the leaderboard though.`);
-                return;
-              }
-              db.none(
-                `INSERT INTO ntc_leaderboard (user_id, server_id, correct)
+            // Return the first user with a correct resposne.
+            if (!firstUser) return; // no user
+            const member = message.guild?.member(firstUser.author);
+            if (!member) return; // no member
+            const username = member.displayName;
+
+            // Check if guild exists for TypeScript null checking
+            const guild = message.guild;
+            if (!guild) return;
+
+            // Send congratulations, and remove serverid from ntcCalls
+            await message.channel.send(`${username} got it correct! The card is ${name} [★${randRarity}] (${jpname}).`);
+            ntcCalls.delete(guild.id);
+
+            db.none(
+              `INSERT INTO ntc_leaderboard (user_id, server_id, correct)
                 VALUES ($[userID], $[serverID], 1)
                 ON CONFLICT (user_id, server_id)
                 DO UPDATE SET correct = ntc_leaderboard.correct + 1 WHERE ntc_leaderboard.user_id = $[userID]`,
-                {
-                  userID: member.id,
-                  serverID: guild.id,
-                },
-              )
-                // .then((data) => {
-                //   message.channel.send(`Successfully updated score?`);
-                //   console.log(data);
-                //   return data;
-                // })
-                .catch((e) => console.error(e));
-            })
-            .catch(() => {
-              message.channel.send(`The above card was: ${name} [★${randRarity}] (${jpname}).`);
-            });
-        });
+              {
+                userID: member.id,
+                serverID: guild.id,
+              },
+            )
+              // .then((data) => {
+              //   message.channel.send(`Successfully updated score?`);
+              //   console.log(data);
+              //   return data;
+              // })
+              .catch((e) => console.error(e));
+          })
+          .catch(async () => {
+            if (cancelResponse) return;
+            await message.channel.send(`The above card was: ${name} [★${randRarity}] (${jpname}).`);
+            const guild = message.guild;
+            if (!guild) return;
+            ntcCalls.delete(guild.id);
+          });
+      });
       return;
     }
   },

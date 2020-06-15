@@ -747,6 +747,22 @@ class Wiki {
 
     return groupedAliases;
   }
+
+  public static async getCardSeries(charID: string): Promise<string | undefined> {
+    const series = 'S' + charID.slice(1, 4);
+
+    const rawText = await fetch(`https://puyonexus.com/wiki/Template:${series}?action=raw`)
+      .then((res) => {
+        if (res.status === 200) {
+          return res.text();
+        }
+      })
+      .then((data) => data);
+
+    if (!rawText) return;
+
+    return getTemplateValue(rawText, 'name');
+  }
 }
 
 export { TitleResult, EventData, Wiki };
