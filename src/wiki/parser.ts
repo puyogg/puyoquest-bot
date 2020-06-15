@@ -186,13 +186,14 @@ async function parseSkillText(text: string): Promise<string> {
   wikitext = wikitext.replace(/(?<= \[\/wiki\/Category:PPQ:).*?(?=_Combination])/g, '');
   wikitext = wikitext.replace(/ \[\/wiki\/Category\:PPQ\:\_Combination\]/g, '');
   wikitext = wikitext.replace(/(?<=\[).*?(?=])/g, '');
-  wikitext = wikitext.replace(/\[\]/g, '');
 
   for (let i = 0; i < strs.length; i++) {
     if (!wikitext.includes('[')) return wikitext;
     const str = strs[i];
     wikitext = wikitext.replace(new RegExp(str.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'), 'g'), wikiTextToEmoji[str]);
   }
+
+  wikitext = wikitext.replace(/\[\]/g, '');
   return wikitext.trim();
 }
 

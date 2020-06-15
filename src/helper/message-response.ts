@@ -2,7 +2,7 @@ import * as Discord from 'discord.js';
 import fetch from 'node-fetch';
 import { getFullCardID, parseTemplateText } from '../wiki/parser';
 import { Wiki } from '../wiki/api';
-import { DateTime } from 'luxon';
+// import { DateTime } from 'luxon';
 
 interface ColorToString {
   [key: string]: string;
@@ -23,18 +23,18 @@ const colorHex: ColorToString = {
   purple: '#991ad9',
 };
 
-function parseTime(timeStr: string): DateTime {
-  const [year, month, day] = timeStr.split('/').map((num) => parseInt(num, 10));
+// function parseTime(timeStr: string): DateTime {
+//   const [year, month, day] = timeStr.split('/').map((num) => parseInt(num, 10));
 
-  const time = DateTime.fromObject({
-    year: year,
-    month: month,
-    day: day,
-    zone: 'Asia/Tokyo',
-  });
+//   const time = DateTime.fromObject({
+//     year: year,
+//     month: month,
+//     day: day,
+//     zone: 'Asia/Tokyo',
+//   });
 
-  return time;
-}
+//   return time;
+// }
 
 /**
  * Reply with an embed containing a specific card's data.
@@ -172,16 +172,16 @@ async function sendCardEmbed(
     );
   }
 
-  // Check if ss skill is still active.
-  const time = DateTime.fromObject({ zone: 'Asia/Tokyo' });
-  if (cardData.ssend && (cardData.ss || cardData.sse) && parseTime(cardData.ssend) > time) {
-    em.addField(
-      `[SS] ${cardData.ss}${(cardData.sslv && ` Lv. ${cardData.sslv}`) || ''} (${cardData.jpss}${
-        (cardData.sslv && ` Lv. ${cardData.sslv}`) || ''
-      })`,
-      `Date: ${cardData.ssstart} ~ ${cardData.ssend}\n` + cardData.sse,
-    );
-  }
+  // // Check if ss skill is still active.
+  // const time = DateTime.fromObject({ zone: 'Asia/Tokyo' });
+  // if (cardData.ssend && (cardData.ss || cardData.sse) && parseTime(cardData.ssend) > time) {
+  //   em.addField(
+  //     `[SS] ${cardData.ss}${(cardData.sslv && ` Lv. ${cardData.sslv}`) || ''} (${cardData.jpss}${
+  //       (cardData.sslv && ` Lv. ${cardData.sslv}`) || ''
+  //     })`,
+  //     `Date: ${cardData.ssstart} ~ ${cardData.ssend}\n` + cardData.sse,
+  //   );
+  // }
 
   const cardSeries = await Wiki.getCardSeries(id);
 
