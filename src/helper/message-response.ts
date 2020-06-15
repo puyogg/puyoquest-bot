@@ -173,6 +173,7 @@ async function sendCardEmbed(
   }
 
   // Check if ss skill is still active.
+  const time = DateTime.fromObject({ zone: 'Asia/Tokyo' });
   if (cardData.ssend && (cardData.ss || cardData.sse) && parseTime(cardData.ssend) > time) {
     em.addField(
       `[SS] ${cardData.ss}${(cardData.sslv && ` Lv. ${cardData.sslv}`) || ''} (${cardData.jpss}${
