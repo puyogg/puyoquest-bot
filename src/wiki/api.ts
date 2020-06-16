@@ -197,7 +197,7 @@ class Wiki {
    */
   public static async getCharRaritiesFromID(charID: string): Promise<string[] | undefined> {
     // Gemini Saga exception
-    const trueCharID = '5362' ? '4362' : charID;
+    const trueCharID = charID === '5362' ? '4362' : charID;
 
     const rawText = await fetch(`https://puyonexus.com/wiki/Template:${trueCharID}?action=raw`)
       .then((res) => {
@@ -779,7 +779,7 @@ class Wiki {
    */
   public static async getTrueName(charID: string): Promise<string | undefined> {
     // Gemini Saga Exception
-    const trueCharID = '5362' ? '4362' : charID;
+    const trueCharID = charID === '5362' ? '4362' : charID;
 
     const rawText = await fetch(`https://puyonexus.com/wiki/Template:${trueCharID}?action=raw`)
       .then((res) => {
