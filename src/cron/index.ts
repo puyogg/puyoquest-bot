@@ -1,7 +1,6 @@
 import { Wiki } from '../wiki/api';
 // import { News } from './ppq-news';
 import * as indexCache from '../index-cache.json';
-import * as fs from 'fs';
 
 async function initCron(): Promise<void> {
   // // what emojis are on EPPC?

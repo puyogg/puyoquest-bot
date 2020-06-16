@@ -40,8 +40,8 @@ export default {
     // Look up card from card index, up to 5 times in case of error.
     const attempts = 5;
     for (let i = 0; i < attempts; i++) {
-      const randCard = await Wiki.getRandomCard();
-      if (!randCard) {
+      const randCard = Wiki.getRandomCard();
+      if (!randCard || !randCard.id || !randCard.name) {
         message.channel.send(`Error: There was a problem fetching the card list.`);
         return;
       }

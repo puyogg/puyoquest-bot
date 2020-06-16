@@ -515,18 +515,13 @@ class Wiki {
   }
 
   // public static async getRandomCard(): Promise<{ id: string; name: string } | undefined> {
-  //   // Check if the indexList has been built recently
-  //   if (!Wiki.indexList) await Wiki.buildCardIndex().catch((e) => console.error(e));
-
-  //   // Check again if the indexList has been made.
-  //   if (!Wiki.indexList) {
-  //     console.log('Error. Failed to load card index list.');
-  //     return;
-  //   }
+  //   if (!Wiki.cardIndex) return;
 
   //   const attempts = 24;
   //   for (let i = 0; i < attempts; i++) {
-  //     const randID = Wiki.indexList[Math.floor(Math.random() * Wiki.indexList.length)];
+  //     const indexData = Wiki.cardIndex[Math.floor(Math.random() * Wiki.cardIndex.length)];
+  //     if (!indexData.id) continue;
+  //     const randID = indexData.id;
   //     const nameReqURL = `https://puyonexus.com/mediawiki/api.php?action=parse&format=json&text=%7B%7B${randID}%7Cindex2%7D%7D&contentmodel=wikitext`;
   //     const templateData: string = await fetch(nameReqURL)
   //       .then((res) => res.json())
@@ -538,44 +533,18 @@ class Wiki {
 
   //     // Check if a valid card was found
   //     if (name.includes('page does not exist')) {
-  //       // Remove the invalid ID
-  //       const ind = Wiki.indexList.indexOf(randID);
-  //       if (ind !== -1) {
-  //         Wiki.indexList.splice(Wiki.indexList.indexOf(randID), 1);
-  //       }
-  //       console.log('Removed invalid ID:', randID);
+  //       continue;
   //     } else {
   //       return { id: randID, name: name };
   //     }
   //   }
-
-  //   return;
   // }
 
-  public static async getRandomCard(): Promise<{ id: string; name: string } | undefined> {
+  public static getRandomCard(): IndexData | undefined {
     if (!Wiki.cardIndex) return;
 
-    const attempts = 24;
-    for (let i = 0; i < attempts; i++) {
-      const indexData = Wiki.cardIndex[Math.floor(Math.random() * Wiki.cardIndex.length)];
-      if (!indexData.id) continue;
-      const randID = indexData.id;
-      const nameReqURL = `https://puyonexus.com/mediawiki/api.php?action=parse&format=json&text=%7B%7B${randID}%7Cindex2%7D%7D&contentmodel=wikitext`;
-      const templateData: string = await fetch(nameReqURL)
-        .then((res) => res.json())
-        .then((data) => data.parse.text['*']);
-      const name = templateData.slice(
-        templateData.indexOf('title="') + 'title="'.length,
-        templateData.indexOf('">', templateData.indexOf('title="') + 'title="'.length),
-      );
-
-      // Check if a valid card was found
-      if (name.includes('page does not exist')) {
-        continue;
-      } else {
-        return { id: randID, name: name };
-      }
-    }
+    const i = Math.floor(Math.random() * Wiki.cardIndex.length);
+    return Wiki.cardIndex[i];
   }
 
   public static async getFilesOnPage(pageTitle: string): Promise<string[] | null> {
