@@ -373,6 +373,7 @@ const titleCasingExceptions: TitleCasingExceptions = {
   'Ver.': 'ver.',
   Puyotet: 'PuyoTet',
   Puyochron: 'PuyoChron',
+  'Make up': 'Make Up',
   ' Hw': ' HW',
   'ver.hw': 'ver.HW',
   'Eva ': 'EVA ',

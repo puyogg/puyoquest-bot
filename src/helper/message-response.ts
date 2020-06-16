@@ -104,7 +104,7 @@ async function sendCardEmbed(
 
   em.addField(
     `Base Lv. ${cardData.maxlv || '?'} Stats`,
-    `HP: ${cardData.hpmax || '?'}　ATK: ${cardData.atkmax || '?'}　REC: ${cardData.rcvmax || '?'}` +
+    `HP: ${cardData.hpmax || '?'}　ATK: ${cardData.atkmax || '?'}　RCV: ${cardData.rcvmax || '?'}` +
       '\n' +
       `Cost: ${cardData.cost || '?'}　Type: ${cardData.type1 || '?'}${
         cardData.type2 === 'Mass' ? '/' + cardData.type2 : ''
