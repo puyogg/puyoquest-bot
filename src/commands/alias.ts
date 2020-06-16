@@ -79,8 +79,6 @@ export default {
       }
     }
 
-    console.log(wikiName);
-
     // Add nickname to db
     await db
       .none(

@@ -36,11 +36,9 @@ const command: Command = {
     if (/\/red|\/blue|\/green|\/yellow|\/purple/.test(name.toLowerCase())) {
       [name, slashColor] = name.split('/');
     }
-    console.log(name, slashColor, '???');
 
     // Check if the name is an aliased name
     name = (await getNameFromAlias(name.toLowerCase())) || name;
-    console.log('Name after alias', name);
 
     // Fix fodder cards
     // if (/\/red|\/blue|\/green|\/yellow|\/purple/.test(name.toLowerCase())) {
@@ -49,7 +47,6 @@ const command: Command = {
     if (slashColor) {
       name = name.split('/')[0] + '/' + titleCase(slashColor);
     }
-    console.log('merged...?', name);
 
     // Update name with English name if the user gave it in Japanese.
     if (Wiki.isJP(name)) {
