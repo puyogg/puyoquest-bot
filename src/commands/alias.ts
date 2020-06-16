@@ -5,6 +5,7 @@ import { parseCardAliasReq } from '../wiki/parser';
 import { getAliasDataForAlias, getAliasesFromName } from '../helper/match-alias';
 import { Wiki } from '../wiki/api';
 import { db } from '../db';
+import { getNameFromAlias } from '../helper/match-alias';
 
 // Retrieve command name from filename
 const name = path.parse(__filename).name;
@@ -17,8 +18,8 @@ export default {
   aliases: ['a'],
   category: ['puyoquest'],
   async execute(message: Discord.Message): Promise<void> {
-    // Only allow aliasing on EPPC
-    if (message.guild?.id !== '133012933260214272') {
+    // Only allow aliasing on EPPC, unless we're in dev mode
+    if (message.guild?.id !== '133012933260214272' && process.env.NODE_ENV === 'production') {
       message.channel.send('Error: Alias management is only allowed on the EPPC Discord server.');
       return;
     }
@@ -53,16 +54,32 @@ export default {
       }
     }
 
-    // Check if the name leads to a redirect
+    // Check if the name leads to a redirect. I need to refactor this lmao
     const redirectName = await Wiki.checkCharRedirect(wikiName);
     if (redirectName) {
       if (wikiName !== redirectName) {
         wikiName = redirectName;
       }
     } else {
-      message.channel.send(`Error: Couldn't find a card named ${wikiName}`);
-      return;
+      // If it's a fodder card, it might have its name at 'name/Red'
+      const redirectName = await Wiki.checkCharRedirect(`${wikiName}/Red`);
+      if (redirectName) {
+        if (wikiName !== redirectName) {
+          wikiName = redirectName;
+        }
+      } else {
+        // Maybe the given name is itself an alias...
+        const aliasName = await getNameFromAlias(wikiName.toLowerCase());
+        if (aliasName) {
+          wikiName = aliasName;
+        } else {
+          message.channel.send(`Error: Couldn't find a card named ${wikiName}`);
+          return;
+        }
+      }
     }
+
+    console.log(wikiName);
 
     // Add nickname to db
     await db

@@ -86,23 +86,30 @@ async function sendCardEmbed(
 
   let title = `${cardData.name || name} ★${rarity}`;
   if (cardData.jpname) title += ` (${cardData.jpname})`;
-  const em = new Discord.MessageEmbed()
-    .setTitle(title)
-    .setURL(cardURL)
-    .addFields([
-      {
-        name: 'Traits',
-        value: `MAX Lv: ${cardData.maxlv || '?'}\nCost: ${cardData.cost || '?'}\nType: ${cardData.type1 || '?'}${
-          cardData.type2 === 'Mass' ? '/' + cardData.type2 : ''
-        }\n`,
-        inline: true,
-      },
-      {
-        name: `Base Lv. ${cardData.maxlv || '?'} Stats`,
-        value: `HP: ${cardData.hpmax || '?'}\nAttack: ${cardData.atkmax || '?'}\nRecovery: ${cardData.rcvmax || '?'}\n`,
-        inline: true,
-      },
-    ]);
+  const em = new Discord.MessageEmbed().setTitle(title).setURL(cardURL);
+  // .addFields([
+  //   {
+  //     name: 'Traits',
+  //     value: `MAX Lv: ${cardData.maxlv || '?'}\nCost: ${cardData.cost || '?'}\nType: ${cardData.type1 || '?'}${
+  //       cardData.type2 === 'Mass' ? '/' + cardData.type2 : ''
+  //     }\n`,
+  //     inline: true,
+  //   },
+  //   {
+  //     name: `Base Lv. ${cardData.maxlv || '?'} Stats`,
+  //     value: `HP: ${cardData.hpmax || '?'}\nAttack: ${cardData.atkmax || '?'}\nRecovery: ${cardData.rcvmax || '?'}\n`,
+  //     inline: true,
+  //   },
+  // ]);
+
+  em.addField(
+    `Base Lv. ${cardData.maxlv || '?'} Stats`,
+    `HP: ${cardData.hpmax || '?'}　ATK: ${cardData.atkmax || '?'}　REC: ${cardData.rcvmax || '?'}` +
+      '\n' +
+      `Cost: ${cardData.cost || '?'}　Type: ${cardData.type1 || '?'}${
+        cardData.type2 === 'Mass' ? '/' + cardData.type2 : ''
+      }`,
+  );
 
   // Add card main color to the left of embed
   if (cardData.color) em.setColor(colorHex[cardData.color.toLowerCase()]);
@@ -163,7 +170,8 @@ async function sendCardEmbed(
       cardData.ast3e,
     );
 
-  if (cardData.bs || cardData.bse) {
+  // Only show Battle Skills if it's >=Lv15, or if the card only has a BS (and no AS)
+  if (parseInt(cardData.bslv, 10) >= 15 || !cardData.as || !cardData.ase) {
     em.addField(
       `[BS] ${cardData.bs}${(cardData.bslv && ` Lv. ${cardData.bslv}`) || ''} (${cardData.jpbs}${
         (cardData.bslv && ` Lv. ${cardData.bslv}`) || ''
@@ -184,13 +192,9 @@ async function sendCardEmbed(
   // }
 
   const cardSeries = await Wiki.getCardSeries(id);
-
-  if (cardSeries) {
-    const link = `[${cardSeries}](https://puyonexus.com/wiki/Category:PPQ:${cardSeries.replace(/\s/g, '_')})`;
-    em.addField('Series', link, true);
-  } else {
-    em.addField('Series', 'None', true);
-  }
+  const seriesText = cardSeries
+    ? `[(${cardSeries})](https://puyonexus.com/wiki/Category:PPQ:${cardSeries.replace(/\s/g, '_')})`
+    : '';
 
   const combinations: string[] = [];
   if (cardData.combin1) combinations.push(cardData.combin1);
@@ -200,13 +204,19 @@ async function sendCardEmbed(
   if (cardData.combin5) combinations.push(cardData.combin5);
 
   const combinationLinks = combinations.map((combination) => {
-    return `[${combination}](https://puyonexus.com/wiki/Category:PPQ:${combination.replace(
+    return `[[${combination}]](https://puyonexus.com/wiki/Category:PPQ:${combination.replace(
       /\s/g,
       '_',
     )}_Combination/Cards)`;
   });
 
-  em.addField('Combinations', combinationLinks.join(', '), true);
+  const combinationsText = combinationLinks.join(' ');
+
+  if (cardSeries) {
+    em.setDescription(`${seriesText} ${combinationsText}`);
+  } else {
+    em.setDescription(combinationsText);
+  }
 
   message.channel.send(em);
 }

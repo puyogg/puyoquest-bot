@@ -5,6 +5,7 @@ import { Wiki } from '../wiki/api';
 import { parseCardReqMsg } from '../wiki/parser';
 import { sendCardEmbed, sendRarityEmbed } from '../helper/message-response';
 import { getNameFromAlias } from '../helper/match-alias';
+import { titleCase } from 'title-case';
 
 // Retrieve command name from filename
 const name = path.parse(__filename).name;
@@ -29,9 +30,26 @@ const command: Command = {
     const parsedNameAndRarity = parseCardReqMsg(message.content);
     let [name] = parsedNameAndRarity;
     const [, rarity] = parsedNameAndRarity;
+    let slashColor = '';
+
+    // Remove /Color from fodder cards
+    if (/\/red|\/blue|\/green|\/yellow|\/purple/.test(name.toLowerCase())) {
+      [name, slashColor] = name.split('/');
+    }
+    console.log(name, slashColor, '???');
 
     // Check if the name is an aliased name
     name = (await getNameFromAlias(name.toLowerCase())) || name;
+    console.log('Name after alias', name);
+
+    // Fix fodder cards
+    // if (/\/red|\/blue|\/green|\/yellow|\/purple/.test(name.toLowerCase())) {
+    //   name = name.split('/')[0] + '/' + titleCase(slashColor);
+    // }
+    if (slashColor) {
+      name = name.split('/')[0] + '/' + titleCase(slashColor);
+    }
+    console.log('merged...?', name);
 
     // Update name with English name if the user gave it in Japanese.
     if (Wiki.isJP(name)) {
@@ -75,13 +93,20 @@ const command: Command = {
     ) {
       // console.log('Found the card in the card index.');
       // console.log('Index Data', indexData);
+
+      // Gemini Saga exception
+      if (message.content.toLowerCase().includes('evil') && indexData.id === '4362' && rarity === '6') {
+        indexData.id = '5362';
+      } else if (message.content.toLowerCase().includes('divine') && indexData.id === '5362' && rarity === '6') {
+        indexData.id = '4362';
+      }
+
       if (rarity) {
         sendCardEmbed(message, indexData.id, indexData.name, indexData.linkName, rarity);
       } else {
         sendRarityEmbed(message, indexData.id, indexData.name, indexData.linkName, indexData.rarestid);
       }
     } else {
-      // console.log(`Couldn't find the card in the card index.`);
       // Update the name if it leads to a redirect
       const redirectName = await Wiki.checkCharRedirect(
         name
@@ -103,7 +128,14 @@ const command: Command = {
         return;
       }
 
-      const charID = await Wiki.getCharID(name);
+      let charID = await Wiki.getCharID(name);
+      // Gemini Saga exception
+      if (message.content.toLowerCase().includes('evil') && charID === '4362') {
+        charID = '5362';
+      } else if (message.content.toLowerCase().includes('divine') && charID === '5362') {
+        charID = '4362';
+      }
+
       if (!charID) {
         const similarName = await Wiki.similaritySearch(name);
         message.channel.send(
@@ -114,10 +146,6 @@ const command: Command = {
         return;
       }
 
-      // console.log(`couldn't find the card in the card index.`);
-      // console.log('Char ID', charID);
-      // console.log('Name', name);
-      // console.log('Redirectname', redirectName);
       if (rarity) {
         sendCardEmbed(message, charID, name, name.replace(/\s/g, '_'), rarity);
       } else {

@@ -16,7 +16,7 @@ export default {
   category: ['puyoquest'],
   async execute(message: Discord.Message): Promise<void> {
     // Only allow aliasing on EPPC
-    if (message.guild?.id !== '133012933260214272') {
+    if (message.guild?.id !== '133012933260214272' && process.env.NODE_ENV === 'production') {
       message.channel.send('Error: Alias management is only allowed on the EPPC Discord server.');
       return;
     }

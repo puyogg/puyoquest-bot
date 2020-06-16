@@ -196,7 +196,10 @@ class Wiki {
    * @param charID 4 Digit ID
    */
   public static async getCharRaritiesFromID(charID: string): Promise<string[] | undefined> {
-    const rawText = await fetch(`https://puyonexus.com/wiki/Template:${charID}?action=raw`)
+    // Gemini Saga exception
+    const trueCharID = '5362' ? '4362' : charID;
+
+    const rawText = await fetch(`https://puyonexus.com/wiki/Template:${trueCharID}?action=raw`)
       .then((res) => {
         if (res.status === 200) {
           return res.text();
@@ -216,11 +219,11 @@ class Wiki {
 
     cards.map((card) => card.slice(card.length - 2, card.length));
 
-    if (cards.includes('16')) {
+    if (cards.some((card) => card.endsWith('16'))) {
       cards.forEach((card, i) => {
-        if (card === '06') {
+        if (card.endsWith('06')) {
           cards[i] = '6-1';
-        } else if (card === '16') {
+        } else if (card.endsWith('16')) {
           cards[i] = '6-2';
         } else {
           cards[i] = card[card.length - 1];
@@ -487,6 +490,12 @@ class Wiki {
           return indexData;
         });
 
+      for (let i = 0; i < chars.length; i++) {
+        while (chars.slice(i + 1).findIndex((char) => char.name === chars[i].name) !== -1) {
+          chars.splice(i + 1, 1);
+        }
+      }
+
       cardIndex.push(...chars);
     }
 
@@ -752,6 +761,27 @@ class Wiki {
     const series = 'S' + charID.slice(1, 4);
 
     const rawText = await fetch(`https://puyonexus.com/wiki/Template:${series}?action=raw`)
+      .then((res) => {
+        if (res.status === 200) {
+          return res.text();
+        }
+      })
+      .then((data) => data);
+
+    if (!rawText) return;
+
+    return getTemplateValue(rawText, 'name');
+  }
+
+  /**
+   * Get the name listed on Template:####
+   * @param charID 4 digit char ID
+   */
+  public static async getTrueName(charID: string): Promise<string | undefined> {
+    // Gemini Saga Exception
+    const trueCharID = '5362' ? '4362' : charID;
+
+    const rawText = await fetch(`https://puyonexus.com/wiki/Template:${trueCharID}?action=raw`)
       .then((res) => {
         if (res.status === 200) {
           return res.text();

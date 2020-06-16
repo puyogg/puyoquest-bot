@@ -57,8 +57,6 @@ export default {
         message.channel.send(`Error: There was a problem fetching rarities for ${randCard.name}`);
         return;
       }
-      // const rarities = rarityData.map((rarity) => rarity.replace('★', ''));
-      // console.log(rarities);
       const randRarity = rarities[Math.floor(Math.random() * rarities.length)];
       const fullID = getFullCardID(randCard.id, randRarity);
 
@@ -85,9 +83,27 @@ export default {
       }
 
       // Get aliases from database
-      const aliasData = await db.any('SELECT nick_name FROM aliases WHERE full_name = $1', name);
+      let aliasData = await db.any('SELECT nick_name FROM aliases WHERE full_name = $1', name);
       let aliases: string[] = [];
-      if (aliasData && aliasData.length > 0) {
+
+      // Some event cards might come in multiple colors. When the cache is built,
+      // only /Red is kept.
+      if (aliasData.length === 0) {
+        // Look it up again, but with /Red attached to the name
+        aliasData = await db.any('SELECT nick_name FROM aliases WHERE full_name = $1', `${name}/Red`);
+      }
+
+      // Valentine Aegis's aliases get sent to "Valentine Aegis", so if ntc picks
+      // "Valen-team Aegis" or "Valen-captain Aegis", the above db lookup doesn't work.
+      // Search for the "true" name.
+      if (aliasData.length === 0) {
+        const trueName = await Wiki.getTrueName(randCard.id);
+        if (trueName) {
+          aliasData = await db.any('SELECT nick_name FROM aliases WHERE full_name = $1', trueName);
+        }
+      }
+
+      if (aliasData.length > 0) {
         aliases = aliasData.map((data) => data['nick_name']);
       }
 
@@ -99,14 +115,18 @@ export default {
         em.setColor(colorHexes[colorInd]);
       }
 
+      em.setFooter(`Say "${process.env.BOT_PREFIX}ntc stop" to give up.`);
+
       let cancelResponse = false;
 
       const filter: Discord.CollectorFilter = (response: Discord.Message) => {
         if (response.content.trim().replace(/\s\s+/g, ' ').toLowerCase() === process.env.BOT_PREFIX + 'ntc stop') {
-          cancelResponse = true;
-          message.channel.send(`The card is ${name} [★${randRarity}] (${jpname}).`);
-          ntcCalls.delete(guildID);
-          return false;
+          if (cancelResponse === false) {
+            cancelResponse = true;
+            message.channel.send(`The card is ${name} [★${randRarity}] (${jpname}).`);
+            ntcCalls.delete(guildID);
+            return false;
+          }
         }
 
         // https://stackoverflow.com/questions/990904/remove-accents-diacritics-in-a-string-in-javascript

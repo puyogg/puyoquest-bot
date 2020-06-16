@@ -1,6 +1,7 @@
 import { Wiki } from '../wiki/api';
-import { News } from './ppq-news';
+// import { News } from './ppq-news';
 import * as indexCache from '../index-cache.json';
+import * as fs from 'fs';
 
 async function initCron(): Promise<void> {
   // // what emojis are on EPPC?
@@ -31,7 +32,7 @@ async function initCron(): Promise<void> {
     Wiki.buildCardIndexFromCache(indexCache);
     console.log('Finished building card index from cache.');
 
-    // await Wiki.buildCardIndex2();
+    // await Wiki.buildCardIndex();
     // try {
     //   fs.writeFileSync('./index-cache.json', JSON.stringify(Wiki.cardIndex));
     //   console.log('Wrote cache to file.');
@@ -39,8 +40,8 @@ async function initCron(): Promise<void> {
     //   console.error(e);
     // }
 
-    const guilds = await News.listGuilds();
-    console.log(guilds);
+    // const guilds = await News.listGuilds();
+    // console.log(guilds);
   }
 }
 

@@ -96,12 +96,13 @@ function getFullCardID(charID: string, rarity: string): string {
       return '436206';
     }
   }
+  if (charID === '5362') return '536206';
 
   const has6S = /s|S|-/g.test(rarity);
-  if (has6S) {
+  if (has6S && rarity.endsWith('2')) {
     return `${charID}1${rarity[0]}`;
   } else {
-    return `${charID}0${rarity}`;
+    return `${charID}0${rarity[0]}`;
   }
 }
 
@@ -376,6 +377,12 @@ const titleCasingExceptions: TitleCasingExceptions = {
   'ver.hw': 'ver.HW',
   'Eva ': 'EVA ',
   Iii: 'III', // Draude III
+  'the Movie': 'The Movie', // Sonic ver. The Movie
+  '/red': '/Red',
+  '/blue': '/Blue',
+  '/green': '/Green',
+  '/yellow': '/Yellow',
+  '/purple': '/Purple',
 };
 
 function normalizeTitle(inputName: string): string {
