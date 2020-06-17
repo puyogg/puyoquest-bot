@@ -105,7 +105,6 @@ export default {
         return correct;
       };
 
-      console.log(jpname);
       message.channel.send('このカードは誰ですか？', em).then(() => {
         // Add a value to the ntcCalls Map so that it can't get called again.
         ntcjCalls.set(guildID, true);

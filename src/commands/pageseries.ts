@@ -25,16 +25,16 @@ const command: Command = {
     // let pageTitle = titleCase(seriesInput).replace(/\s/g, '_');
     let [pageTitle] = await Wiki.parseRedirect(`Category:PPQ:${titleCase(seriesInput).replace(/\s/g, '_')}`);
     // console.log('Original page title', pageTitle);
-    pageTitle = pageTitle.replace('Category:PPQ:', '').replace(' ', '_');
+    pageTitle = pageTitle.replace('Category:PPQ:', '').replace(' ', '_').replace('Et_Al.', 'et_al.');
     // console.log('Page Title', pageTitle);
-    const files = await Wiki.getFilesFromSeriesName(pageTitle);
+    let files = await Wiki.getFilesFromSeriesName(pageTitle);
 
     // If title casing messed up, then try the original message
     if (!files) {
       // console.log('Title casing messed up?');
       pageTitle = seriesInput.replace(/\s/g, '_');
       // console.log(pageTitle);
-      await Wiki.getFilesFromSeriesName(pageTitle);
+      files = await Wiki.getFilesFromSeriesName(pageTitle);
     }
 
     // If the page still can't be found after that, then it probably doesn't exist.

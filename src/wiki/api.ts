@@ -553,7 +553,7 @@ class Wiki {
       format: 'json',
       prop: 'images',
       titles: pageTitle,
-      imlimit: '50',
+      imlimit: '75',
     });
 
     const filePages: string[] | undefined = await fetch(url)
