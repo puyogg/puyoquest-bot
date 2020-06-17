@@ -2,25 +2,15 @@ import * as Discord from 'discord.js';
 import fetch from 'node-fetch';
 import { getFullCardID, parseTemplateText } from '../wiki/parser';
 import { Wiki } from '../wiki/api';
+import { ColorToString, colorHex } from '../helper/embed-color';
 // import { DateTime } from 'luxon';
 
-interface ColorToString {
-  [key: string]: string;
-}
 const activationPuyo: ColorToString = {
   red: '<:red:429944006135382017>',
   blue: '<:blue:429944006601080849>',
   green: '<:green:429944006948945931>',
   yellow: '<:yellow:429944006718521345>',
   purple: '<:purple:429944007397736448>',
-};
-
-const colorHex: ColorToString = {
-  red: '#df1111',
-  blue: '#1346df',
-  green: '#109b08',
-  yellow: '#fa9d0e',
-  purple: '#991ad9',
 };
 
 // function parseTime(timeStr: string): DateTime {
@@ -308,17 +298,17 @@ async function sendFullArtEmbed(
       const em = new Discord.MessageEmbed().setTitle(`${name} (★${rarity})`);
       em.setImage(artData.left);
       em.setURL(`https://puyonexus.com/wiki/${pageTitle}`);
-      msg.edit(em).catch((e) => console.log(e));
+      if (!msg.deleted) msg.edit(em);
     } else if (reaction.emoji.name === '➡️' && artData.right) {
       const em = new Discord.MessageEmbed().setTitle(`${name} (★${rarity})`);
       em.setImage(artData.right);
       em.setURL(`https://puyonexus.com/wiki/${pageTitle}`);
-      msg.edit(em).catch((e) => console.log(e));
+      if (!msg.deleted) msg.edit(em);
     } else if (reaction.emoji.name === '💪' && artData.fullPower) {
       const em = new Discord.MessageEmbed().setTitle(`${name} (★${rarity}) [Full Power]`);
       em.setImage(artData.fullPower);
       em.setURL(`https://puyonexus.com/wiki/${pageTitle}`);
-      msg.edit(em).catch((e) => console.log(e));
+      if (!msg.deleted) msg.edit(em);
     }
     return emojis.includes(reaction.emoji.name);
   };

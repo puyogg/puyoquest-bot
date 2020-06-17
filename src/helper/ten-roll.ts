@@ -49,6 +49,7 @@ class TenRoll {
 
   public async getBuffer(): Promise<Buffer | undefined> {
     const template = await loadImage(path.resolve(__dirname, '../images/ten_roll_template.jpg'));
+    const NEW = await loadImage(path.resolve(__dirname, '../images/new.png'));
     const icons: Image[] = [];
     let error = 0;
     while (icons.length < 10) {
@@ -71,11 +72,22 @@ class TenRoll {
 
     for (let i = 0; i < 5; i++) {
       ctx.drawImage(icons[i], 30 + 111 * i, 153);
+      if (Math.floor(Math.random() * 4) === 0) {
+        ctx.drawImage(NEW, 23 + 111 * i, 125);
+      }
     }
 
     for (let i = 5; i < 10; i++) {
       ctx.drawImage(icons[i], 30 + 111 * (i - 5), 273);
+      if (Math.floor(Math.random() * 4) === 0) {
+        ctx.drawImage(NEW, 23 + 111 * (i - 5), 245);
+      }
     }
+
+    // GASE
+    ctx.font = '30px Ubuntu';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('©GASE', 470, 550);
 
     // Get Data URL?
     const buffer = canvas.toBuffer();

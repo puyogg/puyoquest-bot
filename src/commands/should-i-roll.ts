@@ -12,7 +12,7 @@ const command: Command = {
   args: true,
   aliases: ['roll?'],
   category: ['puyoquest'],
-  async execute(message: Discord.Message, args: string[]): Promise<void> {
+  async execute(message: Discord.Message): Promise<void> {
     const int = Math.floor(Math.random() * 100);
 
     if (int < 5) {

@@ -10,10 +10,10 @@ const name = path.parse(__filename).name;
 
 const command: Command = {
   name: name, // card
-  usage: ['multiquest <RoomCode> [Room Name] ([Duration])'],
+  usage: ['questbattle <RoomCode> [Room Name] ([Duration])'],
   description: 'Send a link to your multiplayer quest room.',
   args: true,
-  aliases: ['mq'],
+  aliases: ['qb'],
   category: ['puyoquest'],
   async execute(message: Discord.Message, args: string[]): Promise<void> {
     // Don't use this command if the bot isn't fully loaded
@@ -50,7 +50,7 @@ const command: Command = {
     const imgURL = character && (await Wiki.getImageURL(`File:Img${character.rarestid}.png`));
 
     const em = new Discord.MessageEmbed()
-      .setTitle('A Multiplayer Quest room has oppened!')
+      .setTitle(`You are being challenged by ${message.member?.displayName}!`)
       .addFields(
         {
           name: 'Room Name',
@@ -69,7 +69,7 @@ const command: Command = {
         },
         {
           name: 'TAPI Link',
-          value: `https://tapi.puyoquest.jp/multi/redirect/?room_no=${roomCode}`,
+          value: `https://tapi.puyoquest.jp/multibattle/redirect/?room_no=${roomCode}`,
           inline: false,
         },
       )
@@ -90,7 +90,7 @@ const command: Command = {
     const msg = await message.channel.send(em);
     setTimeout(() => {
       const em = new Discord.MessageEmbed()
-        .setTitle('⛔ The Multiplayer Quest room has closed.')
+        .setTitle('⛔ The Battle room has closed.')
         .addFields(
           {
             name: 'Room Name',
@@ -109,7 +109,7 @@ const command: Command = {
           },
           {
             name: 'TAPI Link',
-            value: `https:// tapi.puyoquest.jp/multi/redirect/?room_no=${roomCode}`,
+            value: `https://tapi.puyoquest.jp/multibattle/redirect/?room_no=${roomCode}`,
             inline: false,
           },
         )

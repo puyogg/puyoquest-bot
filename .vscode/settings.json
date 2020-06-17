@@ -4,5 +4,6 @@
   },
   "files.exclude": {
     ".env": false
-  }
+  },
+  "files.eol": "\n"
 }

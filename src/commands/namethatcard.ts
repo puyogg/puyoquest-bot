@@ -4,23 +4,9 @@ import { Command } from '../command-info';
 import { Wiki } from '../wiki/api';
 import { getFullCardID, getTemplateValue } from '../wiki/parser';
 import { db } from '../db';
+import { colorHexes } from '../helper/embed-color';
 
 const name = path.parse(__filename).name;
-
-interface ColorToString {
-  [key: string]: string;
-}
-
-const colorHex: ColorToString = {
-  red: '#df1111',
-  blue: '#1346df',
-  green: '#109b08',
-  yellow: '#fa9d0e',
-  purple: '#991ad9',
-};
-
-const colorHexes = [colorHex.red, colorHex.blue, colorHex.green, colorHex.yellow, colorHex.purple];
-
 const ntcCalls = new Discord.Collection<string, boolean>();
 
 export default {
