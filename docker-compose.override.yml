@@ -3,4 +3,5 @@ services:
   discordbot:
     environment:
       NODE_ENV: 'development'
+    tty: true # Keep dev container alive
     command: npm run dev

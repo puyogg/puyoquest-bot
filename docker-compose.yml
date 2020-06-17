@@ -2,7 +2,6 @@ version: '3'
 services:
   discordbot:
     build: . # Build using Dockerfile in directory
-    restart: always
     depends_on:
       - postgres
     environment:
@@ -11,14 +10,12 @@ services:
       DATABASE_URL: 'postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}'
       BOT_PREFIX: '${BOT_PREFIX}'
     volumes:
-      - .:/usr/src/app
-      - ./node_modules:/usr/src/app/node_modules
+      - ./src:/usr/src/app/src
     ports:
       - '2424:2424'
 
   postgres:
     image: postgres:latest
-    restart: always
     ports:
       - '35432:5432'
     environment:

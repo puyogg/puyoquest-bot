@@ -547,7 +547,7 @@ class Wiki {
     return Wiki.cardIndex[i];
   }
 
-  public static async getFilesOnPage(pageTitle: string): Promise<string[] | null> {
+  public static async getFilesOnPage(pageTitle: string): Promise<string[] | undefined> {
     const url = Wiki.url({
       action: 'query',
       format: 'json',
@@ -556,15 +556,21 @@ class Wiki {
       imlimit: '50',
     });
 
-    const filePages: string[] | null = await fetch(url)
+    const filePages: string[] | undefined = await fetch(url)
       .then((res) => res.json())
       .then((data) => {
         const results: TitleResult[] = data.query.pages[Object.keys(data.query?.pages)[0]].images;
         return results.map((result) => result.title);
       })
-      .catch(() => null);
+      .catch(() => undefined);
 
     return filePages;
+  }
+
+  public static async getFilesFromSeriesName(seriesName: string): Promise<string[] | undefined> {
+    const pageTitle = `Category:PPQ:${seriesName}`;
+    const files = await Wiki.getFilesOnPage(pageTitle);
+    return files;
   }
 
   /**
@@ -761,6 +767,31 @@ class Wiki {
     if (!rawText) return;
 
     return getTemplateValue(rawText, 'name');
+  }
+
+  public static async parseRedirect(pageTitle: string): Promise<[string, boolean]> {
+    const data = await fetch(`https://puyonexus.com/wiki/${encodeURI(pageTitle)}?action=raw`)
+      .then((res) => {
+        if (res.status === 200) {
+          return res.text();
+        } else {
+          return;
+        }
+      })
+      .then((d) => d);
+
+    if (!data) return [pageTitle, false];
+
+    if (data.startsWith('#REDIRECT')) {
+      // return data.slice(data.indexOf('[[PPQ:') + '[[PPQ:'.length, data.indexOf(']]'));
+      if (data.includes('[[:')) {
+        return [data.slice(data.indexOf('[[:') + '[[:'.length, data.indexOf(']]')), true];
+      } else {
+        return [data.slice(data.indexOf('[[') + '[['.length, data.indexOf(']]')), true];
+      }
+    } else {
+      return [pageTitle, false];
+    }
   }
 }
 

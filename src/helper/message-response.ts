@@ -3,6 +3,7 @@ import fetch from 'node-fetch';
 import { getFullCardID, parseTemplateText } from '../wiki/parser';
 import { Wiki } from '../wiki/api';
 import { ColorToString, colorHex } from '../helper/embed-color';
+import { createCanvas, Image, loadImage } from 'canvas';
 // import { DateTime } from 'luxon';
 
 const activationPuyo: ColorToString = {

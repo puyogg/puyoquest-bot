@@ -30,3 +30,10 @@ CREATE TABLE IF NOT EXISTS ntc_leaderboard (
   correct integer,
   PRIMARY KEY(user_id, server_id)
 );
+
+CREATE TABLE IF NOT EXISTS ntcj_leaderboard (
+  user_id text,
+  server_id text,
+  correct integer,
+  PRIMARY KEY(user_id, server_id)
+);

@@ -3,4 +3,7 @@ services:
   discordbot:
     environment:
       NODE_ENV: 'production'
+    restart: always
     command: npm run prod
+  postgres:
+    restart: always

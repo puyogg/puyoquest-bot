@@ -68,8 +68,6 @@ class TenRoll {
     // Draw the roll template onto the canvas
     ctx.drawImage(template, 0, 0);
 
-    ctx.drawImage(icons[0], 30, 153);
-
     for (let i = 0; i < 5; i++) {
       ctx.drawImage(icons[i], 30 + 111 * i, 153);
       if (Math.floor(Math.random() * 4) === 0) {
