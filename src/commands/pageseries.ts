@@ -67,9 +67,9 @@ const command: Command = {
     const embedMsg = charLinks.join(' ');
     const highestRarityFiles: string[] = [];
     validCharIDs.forEach((charID) => {
-      const subset = files.filter((file) => file.slice(8, 12) === charID);
+      const subset = files && files.filter((file) => file.slice(8, 12) === charID);
       // Assume the last one is the highest rarity
-      highestRarityFiles.push(subset[subset.length - 1]);
+      if (subset) highestRarityFiles.push(subset[subset.length - 1]);
     });
 
     const url = `https://puyonexus.com/wiki/Category:PPQ:${pageTitle}`;
