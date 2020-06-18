@@ -135,7 +135,7 @@ async function sendCardEmbed(
     );
 
   // Only show Battle Skills if it's >=Lv15, or if the card only has a BS (and no AS)
-  if (cardData.bslv && (parseInt(cardData.bslv, 10) >= 15 || !cardData.as || !cardData.ase)) {
+  if (cardData.bs && (parseInt(cardData.bslv, 10) >= 15 || !cardData.as || !cardData.ase)) {
     em.addField(
       `[BS] ${cardData.bs}${(cardData.bslv && ` Lv. ${cardData.bslv}`) || ''} (${cardData.jpbs}${
         (cardData.bslv && ` Lv. ${cardData.bslv}`) || ''
