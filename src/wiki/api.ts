@@ -256,7 +256,19 @@ class Wiki {
       .then((res) => res.json())
       .then((data) => {
         const results: TitleResult[] = data.query.pages[Object.keys(data.query?.pages)[0]].images;
-        return results.map((result) => result.title).filter((name) => name.includes(charID));
+        const filteredResults = results
+          .map((result) => result.title)
+          .filter((name) => {
+            // Exception for Evil Incarnation Gemini Saga
+            const isEvilGemini = charID === '4362' && name.includes('5362');
+            return name.includes(charID) || isEvilGemini;
+          });
+
+        if ((charID === '4362' || charID === '5362') && filteredResults.length === 3) {
+          return [filteredResults[0], filteredResults[2], filteredResults[1]];
+        } else {
+          return filteredResults;
+        }
       });
 
     return imageURLs;
@@ -635,24 +647,6 @@ class Wiki {
       prob.push(1 - dist / name.length);
     });
 
-    // const indexOfMax = (arr: number[]): number => {
-    //   if (arr.length === 0) {
-    //     return -1;
-    //   }
-
-    //   let max = arr[0];
-    //   let maxIndex = 0;
-
-    //   for (let i = 1; i < arr.length; i++) {
-    //     if (arr[i] > max) {
-    //       maxIndex = i;
-    //       max = arr[i];
-    //     }
-    //   }
-
-    //   return maxIndex;
-    // };
-
     // Check aliases too
     const allAliases: AliasDBReq[] = await db.any('SELECT * FROM aliases');
     const aliasProb: number[] = [];
@@ -669,26 +663,32 @@ class Wiki {
     });
 
     const indexMax = indexOfMax(prob);
-    const aliasMax = indexOfMax(aliasProb);
+    const aliasIndexMax = indexOfMax(aliasProb);
 
-    if (prob[indexMax] < threshold && aliasProb[aliasMax] < threshold) return;
-    if (prob[indexMax] >= aliasProb[aliasMax]) {
+    const maxProb = prob[indexMax];
+    const maxAliasProb = aliasProb[aliasIndexMax] || 0;
+
+    if (maxProb < threshold && maxAliasProb < threshold) return;
+    if (maxProb >= maxAliasProb) {
       const likelyName = Wiki.cardIndex[indexMax].name;
       if (!likelyName) return;
       return likelyName;
     } else {
-      const likelyData = Wiki.indexByNormalizedName?.get(
-        allAliases[aliasMax].full_name
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, ''),
-      );
+      const likelyData =
+        aliasIndexMax < allAliases.length &&
+        aliasIndexMax !== -1 &&
+        Wiki.indexByNormalizedName?.get(
+          allAliases[aliasIndexMax].full_name
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, ''),
+        );
       if (!likelyData || !likelyData.name) return;
       return likelyData.name;
     }
   }
 
-  public static async similaritySearchJP(name: string, threshold = 0.25): Promise<string | undefined> {
+  public static async similaritySearchJP(name: string): Promise<string | undefined> {
     if (!Wiki.cardIndex) return;
     const prob: number[] = [];
     Wiki.cardIndex.forEach((indexData) => {

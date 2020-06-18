@@ -18,18 +18,18 @@ const cooldowns = new Discord.Collection<string, Discord.Collection<string, numb
 
 // Message handling
 client.on('message', (message) => {
-  // Check if in development mode
+  // // Check if in development mode
   // const devmode = process.env.NODE_ENV;
 
-  // Check if message starts with bot prefix.
-  // Don't fuss with bots who check for pings.
+  // Check if message starts with bot prefix. Don't listen to any messages from bots.
   if (!message.content.startsWith(BOT_PREFIX) || message.author.bot) return;
 
   // // Show user's message if dev mode is on
   // if (devmode) console.log(message.author.username, message.content);
 
   // Split into arguments
-  const args = message.content.slice(BOT_PREFIX.length).trim().split(/[ ]+/);
+  // const args = message.content.slice(BOT_PREFIX.length).trim().split(/[ ]+/);
+  const args = message.content.trim().split(/[ ]+/);
 
   // Make the command case insensitive
   const firstArg = args.shift();
@@ -37,13 +37,13 @@ client.on('message', (message) => {
   const commandName = firstArg.toLowerCase();
 
   // Get base command from in-memory command list
-  const command = commands.get(commandName) || commands.find((cmd) => cmd.aliases && cmd.aliases.includes(commandName));
+  const command =
+    commands.get(commandName.slice(1)) ||
+    commands.find((cmd) => cmd.aliases && cmd.aliases.includes(commandName.slice(1)));
   // if (devmode) console.log(command);
 
   // Stop if command is undefined
   if (!command) return;
-
-  // !! - Check if command is usable by the user.
 
   // Cooldowns
   if (!cooldowns.has(command.name)) {

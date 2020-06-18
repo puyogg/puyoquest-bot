@@ -87,6 +87,31 @@ interface BackLST {
   jplst3: string;
 }
 
+interface CharacterQuote {
+  jp: string;
+  en: string;
+}
+
+interface CharacterLore {
+  name: string;
+  jpname: string;
+  descriptionJP: string;
+  descriptionEN: string;
+  translator: string;
+  quotes: CharacterQuote[];
+}
+
+interface TransformData {
+  rarity: string;
+  hsfrom: string;
+  hsto: string;
+  hs1: string;
+  hs2: string;
+  hs3: string;
+  hs4: string;
+  hs5: string;
+}
+
 function getFullCardID(charID: string, rarity: string): string {
   // Gemini Saga exception
   if (charID === '4362') {
@@ -97,6 +122,9 @@ function getFullCardID(charID: string, rarity: string): string {
     }
   }
   if (charID === '5362') return '536206';
+
+  // Amitie (w/o Bracelet) exception
+  if (charID === '1843') return '184362';
 
   const has6S = /s|S|-/g.test(rarity);
   if (has6S && rarity.endsWith('2')) {
@@ -213,7 +241,7 @@ async function parseTemplateText(text: string): Promise<Card> {
     name: getCardTemplateValue(rows, 'name'),
     rarity: getCardTemplateValue(rows, 'rarity'),
     jpname: getCardTemplateValue(rows, 'jpname'),
-    color: getCardTemplateValue(rows, 'color'),
+    color: getCardTemplateValue(rows, 'color').trim().toLowerCase(),
     type1: getCardTemplateValue(rows, 'type1'),
     type2: getCardTemplateValue(rows, 'type2'),
     maxlv: getCardTemplateValue(rows, 'maxlv'),
@@ -384,6 +412,8 @@ const titleCasingExceptions: TitleCasingExceptions = {
   '/green': '/Green',
   '/yellow': '/Yellow',
   '/purple': '/Purple',
+  npc: 'NPC',
+  'W/o': 'w/o',
 };
 
 function normalizeTitle(inputName: string): string {
@@ -457,4 +487,65 @@ function parseCardAliasReq(message: string): [string] | [string, string] {
   return [nickName, wikiName];
 }
 
-export { Card, getFullCardID, getTemplateValue, normalizeTitle, parseCardAliasReq, parseTemplateText, parseCardReqMsg };
+async function parseLoreTemplate(text: string): Promise<CharacterLore> {
+  const rows = text.split('\n');
+  const loreData: CharacterLore = {
+    name: getCardTemplateValue(rows, 'name'),
+    jpname: getCardTemplateValue(rows, 'jpname'),
+    descriptionJP: getCardTemplateValue(rows, 'ft', true),
+    descriptionEN: getCardTemplateValue(rows, 'fta', true),
+    translator: getCardTemplateValue(rows, 'ftc', true),
+    quotes: [
+      {
+        jp: getCardTemplateValue(rows, 'ft1', true),
+        en: getCardTemplateValue(rows, 'fta1', true),
+      },
+      {
+        jp: getCardTemplateValue(rows, 'ft2', true),
+        en: getCardTemplateValue(rows, 'fta2', true),
+      },
+      {
+        jp: getCardTemplateValue(rows, 'ft3', true),
+        en: getCardTemplateValue(rows, 'fta3', true),
+      },
+    ],
+  };
+
+  if (loreData.translator) loreData.translator = await parseSkillText(loreData.translator);
+
+  return loreData;
+}
+
+async function parseTransformTemplate(text: string): Promise<TransformData> {
+  let rarity = getTemplateValue(text, 'link');
+  if (rarity) {
+    rarity = rarity.slice(rarity.indexOf('/★') + '/★'.length);
+  } else {
+    rarity = getTemplateValue(text, 'rarity');
+  }
+
+  const transformData: TransformData = {
+    rarity: rarity,
+    hsfrom: getTemplateValue(text, 'hsfrom'),
+    hsto: getTemplateValue(text, 'hsto'),
+    hs1: getTemplateValue(text, 'hs1'),
+    hs2: getTemplateValue(text, 'hs2'),
+    hs3: getTemplateValue(text, 'hs3'),
+    hs4: getTemplateValue(text, 'hs4'),
+    hs5: getTemplateValue(text, 'hs5'),
+  };
+
+  return transformData;
+}
+
+export {
+  Card,
+  getFullCardID,
+  getTemplateValue,
+  normalizeTitle,
+  parseCardAliasReq,
+  parseTemplateText,
+  parseCardReqMsg,
+  parseLoreTemplate,
+  parseTransformTemplate,
+};

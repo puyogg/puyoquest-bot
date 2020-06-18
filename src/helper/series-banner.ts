@@ -1,4 +1,3 @@
-import * as Discord from 'discord.js';
 import { Wiki } from '../wiki/api';
 import { createCanvas, Image, loadImage } from 'canvas';
 

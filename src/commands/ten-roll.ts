@@ -20,7 +20,7 @@ const command: Command = {
     if (!(Wiki.cardIndex && Wiki.indexByID && Wiki.indexByJPName && Wiki.indexByNormalizedName)) return;
 
     const buffer = await new TenRoll(message).getBuffer();
-    message.channel.send({
+    message.reply({
       files: [buffer],
     });
   },

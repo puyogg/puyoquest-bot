@@ -19,7 +19,6 @@ class TenRoll {
     let randCard = Wiki.getRandomCard();
     while (randCard && randCard.id && ['1239', '2239', '3239', '4239', '5239', '1238'].includes(randCard.id)) {
       randCard = Wiki.getRandomCard();
-      console.log(randCard);
     }
     if (!randCard || !randCard.id || !randCard.name) {
       this.message.channel.send(`Error: There was a problem fetching the card list.`);

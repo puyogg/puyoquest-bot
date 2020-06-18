@@ -66,7 +66,6 @@ export default {
           `Error: There was a problem fetching the character portrait for ${name}. Trying a different character...`,
         );
         continue;
-        console.log('nopssase');
       }
 
       const em = new Discord.MessageEmbed();

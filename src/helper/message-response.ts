@@ -1,10 +1,9 @@
 import * as Discord from 'discord.js';
-import fetch from 'node-fetch';
-import { getFullCardID, parseTemplateText } from '../wiki/parser';
+import { getFullCardID, parseTemplateText, parseLoreTemplate } from '../wiki/parser';
 import { Wiki } from '../wiki/api';
-import { ColorToString, colorHex } from '../helper/embed-color';
-import { createCanvas, Image, loadImage } from 'canvas';
-// import { DateTime } from 'luxon';
+import { ColorToString, colorHex, colorHexes } from '../helper/embed-color';
+import * as Entities from 'html-entities';
+const entities = new Entities.XmlEntities();
 
 const activationPuyo: ColorToString = {
   red: '<:red:429944006135382017>',
@@ -42,23 +41,11 @@ async function sendCardEmbed(
   linkName: string,
   rarity: string,
 ): Promise<void> {
-  // console.log(id, rarity);
   const fullCardID = getFullCardID(id, rarity);
-
   // Try to retrieve card page from wiki.
   const rawText = await Wiki.getRawCardData(fullCardID);
   if (!rawText) {
-    // console.log(fullCardID);
     message.channel.send(`Error: ${name} is not available in rarity: ★${rarity}`);
-    const rawText = await fetch(`https://puyonexus.com/wiki/Template:${fullCardID}?action=raw`)
-      .then((res) => {
-        if (res.status === 200) {
-          return res.text();
-        }
-      })
-      .then((data) => data)
-      .catch((e) => console.error(e));
-    console.log('rawText', rawText);
     return;
   }
 
@@ -78,20 +65,6 @@ async function sendCardEmbed(
   let title = `${cardData.name || name} ★${rarity}`;
   if (cardData.jpname) title += ` (${cardData.jpname})`;
   const em = new Discord.MessageEmbed().setTitle(title).setURL(cardURL);
-  // .addFields([
-  //   {
-  //     name: 'Traits',
-  //     value: `MAX Lv: ${cardData.maxlv || '?'}\nCost: ${cardData.cost || '?'}\nType: ${cardData.type1 || '?'}${
-  //       cardData.type2 === 'Mass' ? '/' + cardData.type2 : ''
-  //     }\n`,
-  //     inline: true,
-  //   },
-  //   {
-  //     name: `Base Lv. ${cardData.maxlv || '?'} Stats`,
-  //     value: `HP: ${cardData.hpmax || '?'}\nAttack: ${cardData.atkmax || '?'}\nRecovery: ${cardData.rcvmax || '?'}\n`,
-  //     inline: true,
-  //   },
-  // ]);
 
   em.addField(
     `Base Lv. ${cardData.maxlv || '?'} Stats`,
@@ -131,7 +104,7 @@ async function sendCardEmbed(
     em.addField(
       `[AS] ${cardData.as}${(cardData.aslv && ` Lv. ${cardData.aslv}`) || ''} (${cardData.jpas}${
         (cardData.aslv && ` Lv. ${cardData.aslv}`) || ''
-      }) [${activationPuyo[cardData.color.toLowerCase()]}×${cardData.asn}]`,
+      }) [${activationPuyo[cardData.color]}×${cardData.asn}]`,
       cardData.ase,
     );
   }
@@ -162,7 +135,7 @@ async function sendCardEmbed(
     );
 
   // Only show Battle Skills if it's >=Lv15, or if the card only has a BS (and no AS)
-  if (parseInt(cardData.bslv, 10) >= 15 || !cardData.as || !cardData.ase) {
+  if (cardData.bslv && (parseInt(cardData.bslv, 10) >= 15 || !cardData.as || !cardData.ase)) {
     em.addField(
       `[BS] ${cardData.bs}${(cardData.bslv && ` Lv. ${cardData.bslv}`) || ''} (${cardData.jpbs}${
         (cardData.bslv && ` Lv. ${cardData.bslv}`) || ''
@@ -171,18 +144,9 @@ async function sendCardEmbed(
     );
   }
 
-  // // Check if ss skill is still active.
-  // const time = DateTime.fromObject({ zone: 'Asia/Tokyo' });
-  // if (cardData.ssend && (cardData.ss || cardData.sse) && parseTime(cardData.ssend) > time) {
-  //   em.addField(
-  //     `[SS] ${cardData.ss}${(cardData.sslv && ` Lv. ${cardData.sslv}`) || ''} (${cardData.jpss}${
-  //       (cardData.sslv && ` Lv. ${cardData.sslv}`) || ''
-  //     })`,
-  //     `Date: ${cardData.ssstart} ~ ${cardData.ssend}\n` + cardData.sse,
-  //   );
-  // }
+  const seriesData = await Wiki.getCardSeries(id);
+  const cardSeries = seriesData && entities.decode(seriesData);
 
-  const cardSeries = await Wiki.getCardSeries(id);
   const seriesText = cardSeries
     ? `[(${cardSeries})](https://puyonexus.com/wiki/Category:PPQ:${cardSeries.replace(/\s/g, '_')})`
     : '';
@@ -229,8 +193,12 @@ async function sendRarityEmbed(
   const rarities = await Wiki.getCharRarities(linkName);
 
   const em = new Discord.MessageEmbed()
-    .setTitle(`${name} has available rarities: ${rarities.join(', ')}`)
+    .setTitle(`${name} has available rarities:`)
     .setURL(`https://puyonexus.com/wiki/PPQ:${linkName}`);
+
+  const links = rarities.map((rarity) => `[[${rarity}]](https://puyonexus.com/wiki/PPQ:${linkName}/${rarity})`);
+  em.setDescription(links.join(' '));
+  em.setColor(colorHexes[parseInt(id[0], 10) - 1]);
 
   // Skip requesting all the available image files if we already know the highest rarity.
   if (rarestid) {
@@ -276,22 +244,10 @@ async function sendFullArtEmbed(
   const msg = await message.channel.send(em);
   const emojis = ['⬅️', '➡️', '💪'];
 
-  // if (artData.left && !artData.right && !artData.fullPower) {
-  //   return;
-  // } else if (artData.left && artData.right && !artData.fullPower) {
-  //   await msg.react(emojis[0]);
-  //   await msg.react(emojis[1]);
-  // } else if (artData.left && !artData.right && artData.fullPower) {
-  //   await msg.react(emojis[0]);
-  //   await msg.react(emojis[2]);
-  // } else if (artData.left && artData.right && artData.fullPower) {
-  //   for (let i = 0; i < emojis.length; i++) await msg.react(emojis[i]);
-  // }
-
   if (artData.left && !artData.right && !artData.fullPower) return;
-  if (artData.right || artData.fullPower) await msg.react(emojis[0]).catch((e) => console.log(e));
-  if (artData.right) await msg.react(emojis[1]).catch((e) => console.log(e));
-  if (artData.fullPower) await msg.react(emojis[2]).catch((e) => console.log(e));
+  if (artData.right || artData.fullPower) await msg.react(emojis[0]).catch((e) => console.error(e));
+  if (artData.right) await msg.react(emojis[1]).catch((e) => console.error(e));
+  if (artData.fullPower) await msg.react(emojis[2]).catch((e) => console.error(e));
 
   const filter = (reaction: Discord.MessageReaction, user: Discord.User): boolean => {
     if (user.bot) return false;
@@ -317,7 +273,67 @@ async function sendFullArtEmbed(
   msg
     .awaitReactions(filter, { max: 48, time: 300000, errors: ['time'] })
     .then(() => undefined)
-    .catch((e) => console.log(e));
+    .catch((e) => console.error(e));
 }
 
-export { sendCardEmbed, sendRarityEmbed, sendFullArtEmbed };
+async function sendLoreEmbed(
+  message: Discord.Message,
+  id: string,
+  name: string,
+  linkName: string,
+  rarity: string,
+): Promise<void> {
+  const fullCardID = getFullCardID(id, rarity);
+
+  // Try to retrieve card page from wiki.
+  const rawText = await Wiki.getRawCardData(fullCardID);
+  if (!rawText) {
+    message.channel.send(`Error: ${name} is not available in rarity: ★${rarity}`);
+    return;
+  }
+
+  const loreData = await parseLoreTemplate(rawText);
+
+  // Check if the card has multiple cards of the same rarity level (e.g. 6S cards, Saint Seiya Gemini)
+  // This affects how the URL is formed.
+  const rarities = await Wiki.getCharRarities(linkName);
+  const hasMultipleSameRarity = rarities.filter((str) => str.includes(rarity[0])).length > 1;
+  const cardURL = hasMultipleSameRarity
+    ? `https://puyonexus.com/wiki/PPQ:${linkName}/★${rarity[0]}-${
+        rarity[rarity.length - 1].toLowerCase() === 's' ? '2' : rarity.length > 1 ? rarity[rarity.length - 1] : '1'
+      }`.replace(/\s/g, '_')
+    : `https://puyonexus.com/wiki/PPQ:${linkName}/★${rarity}`.replace(/\s/g, '_');
+  const thumbnailURL = await Wiki.getImageURL(`File:Img${fullCardID}.png`);
+
+  let title = `${loreData.name || name} ★${rarity}`;
+  if (loreData.jpname) title += ` (${loreData.jpname})`;
+
+  const em = new Discord.MessageEmbed().setTitle(title).setURL(cardURL);
+  em.setDescription(
+    `${loreData.translator ? loreData.translator : 'N/A'}`
+      .replace('Translation Credits', 'Translation Credits:')
+      .replace('Editors', '| Editors'),
+  );
+
+  em.addField(
+    'Flavor Text',
+    `${loreData.descriptionJP ? `\`\`\`${loreData.descriptionJP}\`\`\`` : '```N/A```'}${
+      loreData.descriptionEN ? loreData.descriptionEN : 'N/A'
+    }\n`,
+  );
+
+  let monologueText = '';
+  loreData.quotes.forEach((quote) => {
+    monologueText += `${quote.jp ? `\`\`\`${quote.jp}\`\`\`` : '```N/A```'}${quote.en ? `"${quote.en}"` : 'N/A'}\n`;
+  });
+
+  em.addField('Monologue Lines', monologueText);
+
+  if (thumbnailURL) em.setThumbnail(thumbnailURL);
+
+  message.channel.send(em);
+
+  return;
+}
+
+export { sendCardEmbed, sendRarityEmbed, sendFullArtEmbed, sendLoreEmbed };

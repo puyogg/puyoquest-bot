@@ -8,9 +8,9 @@ const name = path.parse(__filename).name;
 const command: Command = {
   name: name, // card
   usage: ['should-i-roll'],
-  description: 'Look up a card on the Puyo Nexus Wiki',
+  description: 'Ask a demon for advice.',
   args: true,
-  aliases: ['roll?'],
+  aliases: ['shouldiroll'],
   category: ['puyoquest'],
   async execute(message: Discord.Message): Promise<void> {
     const int = Math.floor(Math.random() * 100);
