@@ -17,14 +17,14 @@ You can add my fork of the bot, "Yotarou", to your server with this link: https:
 | ?card            | ?c       | ?c <Name                          | JPName                                                                                                  | Alias> [rarity#] | Get a card's rarities, or supply a rarity to get full details. |
 | ?fullart         | ?fa      | ?fa <Name                         | JPName                                                                                                  | Alias> [rarity#] | Request a card's full body art. Includes any asymmetrical and Full Power art. |
 | ?alias           | ?a       | ?a AliasName >> CharacterName     | Alias a name to a character. Only usable on the EPPC Discord.                                           |
-| ?aliaslist       | ?al      | ?al [Alias                        | Name]                                                                                                   | View the aliases available for a character. |
+| ?aliaslist       | ?al      | ?al [Alias/Name]                                   | View the aliases available for a character. |
 | ?aliasdelete     | ?ad      | ?ad [Alias]                       | Remove an alias. Only usable on the EPPC Discord.                                                       |
 | ?namethatcard    | ?ntc     | ?ntc                              | Play "Name that card!".                                                                                 |
 | ?ntc-leaderboard | ?ntcl    | ?ntcl                             | List the top 10 ntc players on the server.                                                              |
 | ?page            | ?p       | ?p [PageName]                     | Get a link to the Puyo Quest wiki. If a page title isn't supplied, the bot will link to the PPQ Portal. |
 | ?pageseries      | ?ps      | ?ps [PageSeries]                  | Get a link to a card series.                                                                            |
-| ?multiquest      | ?mq      | ?mq <RoomCode> [Info]([Duration]) | Send a clickable link to your multiplayer room.                                                         |
-| ?questbattle     | ?qb      | ?qb <RoomCode> [Info]([Duration]) | Send a clickable link to your battle room.                                                              |
+| ?multiquest      | ?mq      | ?mq <RoomCode> [Info] ([Duration]) | Send a clickable link to your multiplayer room.                                                         |
+| ?questbattle     | ?qb      | ?qb <RoomCode> [Info] ([Duration]) | Send a clickable link to your battle room.                                                              |
 | ?ten-roll        | ?tenroll | ?tenroll                          | Combat your gambling addiction.                                                                         |
 
 ## Installing a clone of the bot
