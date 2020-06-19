@@ -4,7 +4,91 @@ import * as Discord from 'discord.js';
 import { Wiki } from '../wiki/api';
 import { titleCase } from 'title-case';
 import { getSeriesBanner } from '../helper/series-banner';
+import leven = require('leven');
 
+const TITLE_ACCURACY_THRESHOLD = 0.85;
+
+function potentialSeries(seriesInput: string): string[] {
+  const series = seriesInput.toLowerCase();
+  const potentials: string[] = [series];
+
+  const title = series.includes('series') ? series.slice(0, series.indexOf('series')).trim() : series;
+  potentials.push(title + ' series');
+
+  potentials.push(title + 's series');
+  potentials.push(title + 'es series');
+
+  if (title.endsWith('s')) {
+    potentials.push(title.slice(0, title.length - 1) + ' series');
+  }
+
+  if (title.endsWith('y')) {
+    potentials.push(title.slice(0, title.length - 1) + 'ies series');
+  }
+
+  if (title.endsWith('es')) {
+    potentials.push(title.slice(0, title.length - 2) + ' series');
+  }
+
+  if (title.endsWith('ies')) {
+    potentials.push(title.slice(0, title.length - 3) + 'y series');
+  }
+
+  return potentials;
+}
+
+async function makeMessageOptions(files: string[], pageTitle: string): Promise<Discord.MessageOptions> {
+  // Get the unique set of 4 digit char IDs
+  const charIDs = [...new Set(files.map((file) => file.slice(8, 12)))];
+  const validCharIDs: string[] = [];
+
+  // Get names for each ID
+  const charLinks: string[] = [];
+  charIDs.forEach((charID) => {
+    const card = Wiki.indexByID && Wiki.indexByID.get(charID);
+    if (card) {
+      charLinks.push(`[[${card.name}]](https://puyonexus.com/wiki/${card.linkName})`);
+      validCharIDs.push(charID);
+    }
+  });
+
+  const embedMsg = charLinks.join(' ');
+  const highestRarityFiles: string[] = [];
+  validCharIDs.forEach((charID) => {
+    const subset = files && files.filter((file) => file.slice(8, 12) === charID);
+    // Assume the last one is the highest rarity
+    if (subset) highestRarityFiles.push(subset[subset.length - 1]);
+  });
+
+  const url = `https://puyonexus.com/wiki/Category:PPQ:${pageTitle.replace(/\s/g, '_')}`;
+  const banner = await getSeriesBanner(highestRarityFiles);
+
+  return (function (): Discord.MessageOptions {
+    if (!banner) {
+      return {
+        embed: {
+          title: pageTitle.replace(/\_/g, ' '),
+          description: embedMsg,
+          url: url,
+        },
+      };
+    } else {
+      return {
+        embed: {
+          title: pageTitle.replace(/\_/g, ' '),
+          description: embedMsg,
+          url: url,
+        },
+        files: [
+          {
+            attachment: banner,
+            name: 'file.jpg',
+          },
+        ],
+      };
+    }
+  })();
+}
 // Retrieve command name from filename
 const name = path.parse(__filename).name;
 
@@ -21,85 +105,64 @@ const command: Command = {
       return;
     }
 
-    const seriesInput = args.join(' ').replace(/\s\s+/g, ' ');
-    // let pageTitle = titleCase(seriesInput).replace(/\s/g, '_');
-    let [pageTitle] = await Wiki.parseRedirect(`Category:PPQ:${titleCase(seriesInput).replace(/\s/g, '_')}`);
-    // console.log('Original page title', pageTitle);
-    pageTitle = pageTitle.replace('Category:PPQ:', '').replace(' ', '_').replace('Et_Al.', 'et_al.');
-    // console.log('Page Title', pageTitle);
-    let files = await Wiki.getFilesFromSeriesName(pageTitle);
+    const seriesPages = await Wiki.getSeriesPages();
+    if (!seriesPages) {
+      message.channel.send(`Error: Couldn't reach the wiki.`);
+      return;
+    }
 
-    // If title casing messed up, then try the original message
-    if (!files) {
-      // console.log('Title casing messed up?');
-      pageTitle = seriesInput.replace(/\s/g, '_');
-      // console.log(pageTitle);
+    let seriesInput = args.join(' ').replace(/\s\s+/g, ' ');
+
+    // Try to find by directly accessing the wiki page and checking if it exists
+    let pageTitle: string | undefined;
+    let files: string[] | undefined;
+    const potentials = potentialSeries(seriesInput);
+    // console.log(potentials);
+    for (let i = 0; i < potentials.length; i++) {
+      const potential = potentials[i];
+      [pageTitle] = await Wiki.parseRedirect(`Category:PPQ:${titleCase(potential).replace(/\s/g, '_')}`);
+      pageTitle = pageTitle.replace('Category:PPQ:', '').replace(' ', '_').replace('Et_Al.', 'et_al.');
       files = await Wiki.getFilesFromSeriesName(pageTitle);
+      if (files) break;
     }
 
-    // If the page still can't be found after that, then it probably doesn't exist.
-    if (!files) {
-      message.channel.send(`Error: ${seriesInput} isn't a valid card series.`);
+    if (files) {
+      const msgOptions = await makeMessageOptions(files, pageTitle || seriesInput);
+      // console.log('Made message', msgOptions);
+      message.channel.send(msgOptions);
       return;
     }
 
-    // // Card series with side colors include extraneous images.
-    // files = files.filter((file) => file.includes('Img'));
-    if (!files) {
-      message.channel.send(`Error: There was a problem getting images for ${seriesInput} Series`);
+    // Try to find with similarity search instead
+    if (!seriesInput.toLowerCase().includes('series')) seriesInput += ' series';
+
+    // Perform similarity search against the potential series pages.
+    const similarity = seriesPages.map((page) => leven(titleCase(seriesInput), page));
+
+    // Get the name with the lowest distance
+    const indMin = similarity.indexOf(Math.min(...similarity));
+    const score = similarity[indMin];
+    pageTitle = seriesPages[indMin];
+    // https://stackoverflow.com/questions/45783385/normalizing-the-edit-distance
+    const accuracy = 1 - score / Math.max(pageTitle.length, seriesInput.length);
+
+    if (accuracy < TITLE_ACCURACY_THRESHOLD) {
+      message.channel.send(
+        `Error: Couldn't find a series named **${seriesInput}**. Perhaps you meant **${pageTitle}**?`,
+      );
       return;
     }
 
-    // Get the unique set of 4 digit char IDs
-    const charIDs = [...new Set(files?.map((file) => file.slice(8, 12)))];
-    const validCharIDs: string[] = [];
+    // Replace spaces in page title with underscores
+    pageTitle = pageTitle.replace(/\s/g, '_');
 
-    // Get names for each ID
-    const charLinks: string[] = [];
-    charIDs.forEach((charID) => {
-      const card = Wiki.indexByID && Wiki.indexByID.get(charID);
-      if (card) {
-        charLinks.push(`[[${card.name}]](https://puyonexus.com/wiki/${card.linkName})`);
-        validCharIDs.push(charID);
-      }
-    });
+    files = (await Wiki.getFilesFromSeriesName(pageTitle)) || [];
 
-    const embedMsg = charLinks.join(' ');
-    const highestRarityFiles: string[] = [];
-    validCharIDs.forEach((charID) => {
-      const subset = files && files.filter((file) => file.slice(8, 12) === charID);
-      // Assume the last one is the highest rarity
-      if (subset) highestRarityFiles.push(subset[subset.length - 1]);
-    });
-
-    const url = `https://puyonexus.com/wiki/Category:PPQ:${pageTitle}`;
-    const banner = await getSeriesBanner(highestRarityFiles);
-
-    if (!banner) {
-      message.channel.send(url);
-      return;
-    } else {
-      message.channel.send(url, {
-        embed: {
-          description: embedMsg,
-        },
-        files: [
-          {
-            attachment: banner,
-            name: 'file.jpg',
-          },
-        ],
-      });
-      return;
+    // console.log('Making response from index instead.');
+    const msgOptions = await makeMessageOptions(files, pageTitle || seriesInput);
+    if (msgOptions) {
+      message.channel.send(msgOptions);
     }
-
-    // if (pageTitle.length === 0) {
-    //   message.channel.send(`Error: You didn't supply a series name.`);
-    //   return;
-    // } else {
-    //   message.channel.send(`https://puyonexus.com/wiki/Category:PPQ:${pageTitle}_Series`);
-    //   return;
-    // }
   },
 };
 

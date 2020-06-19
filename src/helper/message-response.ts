@@ -202,7 +202,7 @@ async function sendRarityEmbed(
   const rarities = await Wiki.getCharRarities(linkName);
 
   const em = new Discord.MessageEmbed()
-    .setTitle(`${name} has available rarities:`)
+    .setTitle(`${name.replace(/\_/g, ' ')} has available rarities:`)
     .setURL(`https://puyonexus.com/wiki/PPQ:${linkName}`);
 
   const links = rarities.map((rarity) => {
@@ -250,7 +250,7 @@ async function sendFullArtEmbed(
     message.channel.send(`Error: There was a problem retrieving the full art for ${name}`);
     return;
   }
-  const em = new Discord.MessageEmbed().setTitle(`${name} (★${rarity})`);
+  const em = new Discord.MessageEmbed().setTitle(`${name.replace(/\_/g, ' ')} (★${rarity})`);
   em.setImage(artData.left);
   em.setURL(`https://puyonexus.com/wiki/${pageTitle}`);
 

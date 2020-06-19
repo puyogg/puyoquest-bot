@@ -4,6 +4,7 @@ import { getTemplateValue } from './parser';
 import * as leven from 'leven';
 import { DateTime } from 'luxon';
 import { db } from '../db';
+import { encode } from 'punycode';
 
 interface TitleResult {
   title: string;
@@ -793,6 +794,21 @@ class Wiki {
     } else {
       return [pageTitle, false];
     }
+  }
+
+  public static async getSeriesPages(): Promise<string[] | undefined> {
+    const url =
+      'https://puyonexus.com/mediawiki/api.php?action=query&format=json&list=categorymembers&cmtitle=Category%3APPQ+series+categories&cmlimit=1000';
+    const data = await fetch(url)
+      .then((res) => res.json())
+      .then((d) =>
+        (d.query.categorymembers as { pageid: number; ns: number; title: string }[]).map((obj) =>
+          obj['title'].replace('Category:PPQ:', ''),
+        ),
+      )
+      .catch(() => undefined);
+
+    return data;
   }
 }
 
