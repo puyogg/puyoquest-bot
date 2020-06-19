@@ -1,10 +1,10 @@
 import { Wiki } from '../wiki/api';
 // import { News } from './ppq-news';
 import * as indexCache from '../index-cache.json';
+// import { client } from '../client';
 
 async function initCron(): Promise<void> {
   // // what emojis are on EPPC?
-  // const want = ['red', 'blue', ''];
   // const emojis = Array.from(client.emojis.cache.entries());
   // const emojiData = emojis
   //   .map((emoji) => {
@@ -15,7 +15,7 @@ async function initCron(): Promise<void> {
   //       text: `<:${emoji[1].name}:${emoji[1].id}>`,
   //     };
   //   })
-  //   .filter((emoji) => emoji.guild === 'English Puyo Puyo Community' && emoji.name === 'hard_puyo');
+  //   .filter((emoji) => emoji.guild === 'English Puyo Puyo Community' && emoji.name === 'fatigue');
   // console.log(emojiData);
 
   if (process.env.NODE_ENV === 'production') {

@@ -73,6 +73,7 @@ const wikiTextToEmoji: WikiTextToEmoji = {
   'Yellow Reflection [] []': '<:yellow_reflection:714902480663740579>',
   'Purple Reflection [] []': '<:purple_reflection:714902513182048336>',
   'Turn Plus [] []': ':clock10:',
+  'Fatigue [] []': '<:fatigue:723390240169132072>',
 };
 
 export { wikiTextToEmoji };
