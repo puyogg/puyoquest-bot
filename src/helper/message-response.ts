@@ -111,7 +111,7 @@ async function sendCardEmbed(
 
   if (cardData.asfe) {
     em.addField(
-      `[FP] ${cardData.as}${(cardData.aslv && ` Lv. ${cardData.aslv}`) || ''} (${cardData.jpas}${
+      `[AS:FP] ${cardData.as}${(cardData.aslv && ` Lv. ${cardData.aslv}`) || ''} (${cardData.jpas}${
         (cardData.aslv && ` Lv. ${cardData.aslv}`) || ''
       }) [${activationPuyo[cardData.color]}×${cardData.asfn}]`,
       cardData.asfe,
