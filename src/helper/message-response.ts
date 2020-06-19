@@ -210,7 +210,6 @@ async function sendRarityEmbed(
     return `[[${rarity}]](${url})`;
   });
 
-  console.log('links?', links);
   em.setDescription(links.join(' '));
   em.setColor(colorHexes[parseInt(id[0], 10) - 1]);
 
