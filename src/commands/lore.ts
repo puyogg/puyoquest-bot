@@ -15,7 +15,7 @@ const command: Command = {
   usage: ['lore <name|kana> [rarity#]'],
   description: 'Look up a card on the Puyo Nexus Wiki',
   args: true,
-  aliases: [],
+  aliases: ['l'],
   category: ['puyoquest'],
   async execute(message: Discord.Message, args: string[]): Promise<void> {
     // Don't use this command if the bot isn't fully loaded

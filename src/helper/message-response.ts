@@ -205,7 +205,12 @@ async function sendRarityEmbed(
     .setTitle(`${name} has available rarities:`)
     .setURL(`https://puyonexus.com/wiki/PPQ:${linkName}`);
 
-  const links = rarities.map((rarity) => `[[${rarity}]](https://puyonexus.com/wiki/PPQ:${linkName}/${rarity})`);
+  const links = rarities.map((rarity) => {
+    const url = `https://puyonexus.com/wiki/PPQ:${linkName}/${rarity}`.replace('(', '%28').replace(')', '%29');
+    return `[[${rarity}]](${url})`;
+  });
+
+  console.log('links?', links);
   em.setDescription(links.join(' '));
   em.setColor(colorHexes[parseInt(id[0], 10) - 1]);
 

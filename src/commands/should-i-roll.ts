@@ -10,7 +10,7 @@ const command: Command = {
   usage: ['should-i-roll'],
   description: 'Ask a demon for advice.',
   args: true,
-  aliases: ['shouldiroll'],
+  aliases: ['shouldiroll', 'sir'],
   category: ['puyoquest'],
   async execute(message: Discord.Message): Promise<void> {
     const int = Math.floor(Math.random() * 100);

@@ -93,6 +93,7 @@ interface CharacterQuote {
 }
 
 interface CharacterLore {
+  [key: string]: string | CharacterQuote[];
   name: string;
   jpname: string;
   descriptionJP: string;
@@ -511,7 +512,11 @@ async function parseLoreTemplate(text: string): Promise<CharacterLore> {
     ],
   };
 
+  if (loreData.descriptionEN) loreData.descriptionEN = await parseSkillText(loreData.descriptionEN);
   if (loreData.translator) loreData.translator = await parseSkillText(loreData.translator);
+  if (loreData.quotes[0].en) loreData.quotes[0].en = await parseSkillText(loreData.quotes[0].en);
+  if (loreData.quotes[1].en) loreData.quotes[1].en = await parseSkillText(loreData.quotes[1].en);
+  if (loreData.quotes[2].en) loreData.quotes[2].en = await parseSkillText(loreData.quotes[2].en);
 
   return loreData;
 }
