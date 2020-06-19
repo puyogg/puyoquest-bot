@@ -4,7 +4,6 @@ import { getTemplateValue } from './parser';
 import * as leven from 'leven';
 import { DateTime } from 'luxon';
 import { db } from '../db';
-import { encode } from 'punycode';
 
 interface TitleResult {
   title: string;
