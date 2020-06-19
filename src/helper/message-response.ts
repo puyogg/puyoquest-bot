@@ -109,6 +109,15 @@ async function sendCardEmbed(
     );
   }
 
+  if (cardData.asfe) {
+    em.addField(
+      `[FP] ${cardData.as}${(cardData.aslv && ` Lv. ${cardData.aslv}`) || ''} (${cardData.jpas}${
+        (cardData.aslv && ` Lv. ${cardData.aslv}`) || ''
+      }) [${activationPuyo[cardData.color]}×${cardData.asfn}]`,
+      cardData.asfe,
+    );
+  }
+
   if (cardData.ast) {
     em.addField(
       `[AS+] ${cardData.ast} (${cardData.jpast}) [${activationPuyo[cardData.color.toLowerCase()]}×${cardData.astn}]`,

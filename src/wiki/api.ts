@@ -252,10 +252,11 @@ class Wiki {
       titles: `Template:${charID}`,
     });
 
-    const imageURLs: string[] = await fetch(url)
+    const imageURLs: string[] | undefined = await fetch(url)
       .then((res) => res.json())
       .then((data) => {
-        const results: TitleResult[] = data.query.pages[Object.keys(data.query?.pages)[0]].images;
+        const results: TitleResult[] | undefined = data.query.pages[Object.keys(data.query?.pages)[0]].images;
+        if (!results) return;
         const filteredResults = results
           .map((result) => result.title)
           .filter((name) => {
