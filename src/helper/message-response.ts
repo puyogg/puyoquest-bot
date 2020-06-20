@@ -258,9 +258,9 @@ async function sendFullArtEmbed(
   const emojis = ['⬅️', '➡️', '💪'];
 
   if (artData.left && !artData.right && !artData.fullPower) return;
-  if (artData.right || artData.fullPower) await msg.react(emojis[0]).catch((e) => console.error(e));
-  if (artData.right) await msg.react(emojis[1]).catch((e) => console.error(e));
-  if (artData.fullPower) await msg.react(emojis[2]).catch((e) => console.error(e));
+  if (artData.right || artData.fullPower) await msg.react(emojis[0]).catch();
+  if (artData.right) await msg.react(emojis[1]).catch();
+  if (artData.fullPower) await msg.react(emojis[2]).catch();
 
   const filter = (reaction: Discord.MessageReaction, user: Discord.User): boolean => {
     if (user.bot) return false;
@@ -283,10 +283,7 @@ async function sendFullArtEmbed(
     return emojis.includes(reaction.emoji.name);
   };
 
-  msg
-    .awaitReactions(filter, { max: 48, time: 300000, errors: ['time'] })
-    .then(() => undefined)
-    .catch((e) => console.error(e));
+  msg.awaitReactions(filter, { max: 48, time: 300000, errors: ['time'] }).catch(() => undefined);
 }
 
 async function sendLoreEmbed(
