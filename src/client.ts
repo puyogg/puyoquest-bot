@@ -38,8 +38,8 @@ client.on('message', (message) => {
 
   // Get base command from in-memory command list
   const command =
-    commands.get(commandName.slice(1)) ||
-    commands.find((cmd) => cmd.aliases && cmd.aliases.includes(commandName.slice(1)));
+    commands.get(commandName.slice(BOT_PREFIX.length)) ||
+    commands.find((cmd) => cmd.aliases && cmd.aliases.includes(commandName.slice(BOT_PREFIX.length)));
   // if (devmode) console.log(command);
 
   // Stop if command is undefined

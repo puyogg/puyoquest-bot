@@ -48,6 +48,20 @@ interface GroupedAliases {
   aliases: string[];
 }
 
+interface WikiLookup {
+  pageid: number;
+  title: string;
+}
+
+interface WikiSearch extends WikiLookup {
+  timestamp: string;
+}
+
+interface WikiSearchDist extends WikiSearch {
+  leven: number;
+  accuracy: number;
+}
+
 const indexOfMax = (arr: number[]): number => {
   if (arr.length === 0) {
     return -1;
@@ -809,6 +823,68 @@ class Wiki {
 
     return data;
   }
+
+  public static async search(str: string): Promise<WikiSearchDist[] | undefined> {
+    const url = Wiki.url({
+      action: 'query',
+      format: 'json',
+      list: 'search',
+      srsearch: str,
+      srlimit: '500',
+      srwhat: 'title',
+      srinfo: '',
+      srprop: 'timestamp',
+    });
+
+    const searchResult = await fetch(url)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.query && data.query.search) {
+          const search = data.query.search as WikiSearch[];
+          const results: WikiSearchDist[] = search.map((s) => {
+            const withDist: WikiSearchDist = {
+              pageid: s.pageid,
+              title: s.title,
+              timestamp: s.timestamp,
+              leven: leven(str, s.title),
+              accuracy: 0,
+            };
+            withDist.accuracy = 1 - withDist.leven / Math.max(s.title.length, str.length);
+            return withDist;
+          });
+          return results;
+        }
+      })
+      .catch(() => undefined);
+
+    if (!searchResult) return;
+
+    // Sort by lowest leven distance
+    searchResult.sort((a, b) => a.leven - b.leven);
+
+    return searchResult;
+  }
+
+  public static async getCategoryMembers(categoryPage: string): Promise<string[] | undefined> {
+    const url = Wiki.url({
+      action: 'query',
+      format: 'json',
+      list: 'categorymembers',
+      cmtitle: categoryPage,
+      cmlimit: '1000',
+    });
+
+    const members = await fetch(url)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.query && data.query.categorymembers) {
+          return (data.query.categorymembers as WikiLookup[]).map((d) => d.title);
+        }
+      })
+      .catch(() => undefined);
+
+    return members;
+  }
 }
 
-export { TitleResult, EventData, Wiki };
+export { IndexData, TitleResult, EventData, Wiki };
