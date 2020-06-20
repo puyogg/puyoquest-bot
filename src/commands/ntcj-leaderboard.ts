@@ -85,8 +85,6 @@ export default {
         end += 5 - (userPlacement - start);
       }
 
-      console.log('Start End', start, end);
-
       // rows is from outside this scope
       rows = await db
         .many(
