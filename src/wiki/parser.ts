@@ -8,6 +8,8 @@ interface Card {
   [key: string]: string;
   name: string; // Card Name
   rarity: string; // Star
+  code: string; // fullCardID
+  link: string;
   jpname: string;
   color: string;
   type1: string; // Attack / Balance / Recovery / HP
@@ -166,18 +168,6 @@ function getTemplateValue(data: string, inputKey: string): string {
   }
 
   const value = data.trim().slice(data.indexOf(key) + key.length);
-  // console.log('Key', key);
-  // if (value.indexOf('|') === -1) {
-  //   console.log('No |');
-  //   if (value.indexOf('\n') === -1) {
-  //     console.log('Very end of string.');
-  //     return value.slice(0, value.length - 2).trim();
-  //   } else {
-  //     return value.slice(0, value.indexOf('\n') < value.length - 2 ? value.indexOf('\n') : value.length - 2).trim();
-  //   }
-  // } else {
-  //   return value.slice(0, value.indexOf('\n') < value.indexOf('|') ? value.indexOf('\n') : value.indexOf('|')).trim();
-  // }
 
   const lineInd = value.indexOf('|') === -1 ? 9999 : value.indexOf('|');
   const breakInd = value.indexOf('\n') === -1 ? 9999 : value.indexOf('\n');
@@ -207,7 +197,11 @@ async function parseSkillText(text: string): Promise<string> {
   });
   let wikitext = await fetch(url)
     .then((res) => res.json())
-    .then((data) => htmlToText.fromString(data.parse.text['*'], { wordwrap: 999 }));
+    .then((data) => {
+      // console.log(data.parse.text);
+      return htmlToText.fromString(data.parse.text['*'], { wordwrap: 999 });
+    })
+    .catch(() => 'Unable to reach the wiki.');
 
   // Check for strings that need to be replaced
   const strs = Object.keys(wikiTextToEmoji);
@@ -240,6 +234,8 @@ async function parseTemplateText(text: string): Promise<Card> {
 
   const cardData: Card = {
     name: getCardTemplateValue(rows, 'name'),
+    code: getCardTemplateValue(rows, 'code'),
+    link: getCardTemplateValue(rows, 'link'),
     rarity: getCardTemplateValue(rows, 'rarity'),
     jpname: getCardTemplateValue(rows, 'jpname'),
     color: getCardTemplateValue(rows, 'color').trim().toLowerCase(),
@@ -436,12 +432,14 @@ function normalizeTitle(inputName: string): string {
   return name;
 }
 
-function parseCardReqMsg(message: string): [string, string | null] {
+function parseCardReqMsg(message: string, isCommand = true): [string, string | null] {
   // Reduce whitespace between any words down to 1 space.
   let msg = message.trim().replace(/\s\s+/g, ' ');
 
   // Remove command name
-  msg = msg.slice(msg.indexOf(' ') + 1);
+  if (isCommand) {
+    msg = msg.slice(msg.indexOf(' ') + 1);
+  }
 
   // Normalize titles
   msg = normalizeTitle(msg);

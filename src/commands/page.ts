@@ -17,16 +17,11 @@ const command: Command = {
     // const pageTitle = args.join('_');
     const pageTitle = args.join(' ');
 
-    // if (pageTitle.length === 0) {
-    //   message.channel.send('https://puyonexus.com/wiki/PPQ:Portal');
-    //   return;
-    // } else if (pageTitle.includes(':')) {
-    //   message.channel.send(`https://puyonexus.com/wiki/${pageTitle}`);
-    //   return;
-    // } else {
-    //   message.channel.send(`https://puyonexus.com/wiki/PPQ:${pageTitle}`);
-    //   return;
-    // }
+    // Link to wiki portal if no page was requsted.
+    if (pageTitle.length === 0) {
+      message.channel.send('https://puyonexus.com/wiki/PPQ:Portal');
+      return;
+    }
 
     // Use MediaWiki Query>Search API to allow for case insensitive matching
     const searchResult = await Wiki.search(pageTitle);

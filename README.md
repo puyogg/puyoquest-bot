@@ -28,6 +28,7 @@ You can add my fork of the bot, "Yotarou", to your server with this link: https:
 | ?ten-roll        | ?tenroll | ?tenroll                          | Combat your gambling addiction.                                                                                                              |
 | ?category-search | ?cs      | ?cs <CategoryName> [[color]]      | Get a link to the category page. If you specify a color in square brackets, you'll get an embed with a subset of the characters on the page. |
 | ?...             | ?csfancy | ?csfancy <CategoryName> [[color]] | Same as above, but the bot will spend some extra seconds making a nice thumbnail of the relevant card portraits.                             |
+| ?deck             | ... | ?deck [[Character Rarity]] | Show an example of a deck by listing out cards. The card name + rarity should be enclosed in square brackets.                             |
 
 ## Installing a clone of the bot
 

@@ -117,12 +117,13 @@ const command: Command = {
     let pageTitle: string | undefined;
     let files: string[] | undefined;
     const potentials = potentialSeries(seriesInput);
-    // console.log(potentials);
     for (let i = 0; i < potentials.length; i++) {
       const potential = potentials[i];
       [pageTitle] = await Wiki.parseRedirect(`Category:PPQ:${titleCase(potential).replace(/\s/g, '_')}`);
       pageTitle = pageTitle.replace('Category:PPQ:', '').replace(' ', '_').replace('Et_Al.', 'et_al.');
-      files = await Wiki.getFilesFromSeriesName(pageTitle);
+      const seriesID = await Wiki.getSeriesIDFromPage(pageTitle);
+      if (!seriesID) continue;
+      files = await Wiki.getFilesFromSeriesID(seriesID);
       if (files) break;
     }
 

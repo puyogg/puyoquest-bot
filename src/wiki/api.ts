@@ -1,9 +1,11 @@
 import fetch from 'node-fetch';
 import * as Discord from 'discord.js';
-import { getTemplateValue } from './parser';
+import { getTemplateValue, Card, parseCardReqMsg, getFullCardID, parseTemplateText } from './parser';
 import * as leven from 'leven';
 import { DateTime } from 'luxon';
 import { db } from '../db';
+import { getNameFromAlias } from '../helper/match-alias';
+import { titleCase } from 'title-case';
 
 interface TitleResult {
   title: string;
@@ -429,44 +431,6 @@ class Wiki {
     return name;
   }
 
-  // public static async buildCardIndex(): Promise<void> {
-  //   const indexPage = [
-  //     'https://puyonexus.com/wiki/PPQ:Card_Index/By_Number/1',
-  //     'https://puyonexus.com/wiki/PPQ:Card_Index/By_Number/2',
-  //     'https://puyonexus.com/wiki/PPQ:Card_Index/By_Number/3',
-  //     'https://puyonexus.com/wiki/PPQ:Card_Index/By_Number/4',
-  //     'https://puyonexus.com/wiki/PPQ:Card_Index/By_Number/5',
-  //     'https://puyonexus.com/wiki/PPQ:Card_Index/NPC',
-  //   ];
-
-  //   // Get list of all IDs
-  //   const charIDs: string[] = [];
-  //   for (const url of indexPage) {
-  //     const page = await fetch(`${url}?action=raw`)
-  //       .then((res) => {
-  //         if (res.status === 200) return res.text();
-  //       })
-  //       .then((data) => data)
-  //       .catch((e) => console.error(e));
-
-  //     if (!page) {
-  //       console.log(`Error accessing page: `, url);
-  //       return;
-  //     }
-
-  //     const IDs = page
-  //       .split('\n')
-  //       .filter((row) => row.startsWith('| {{'))
-  //       .map((row) => row.replace(/index2|{|}|\||\s+/g, ''));
-
-  //     charIDs.push(...IDs);
-  //   }
-
-  //   // Save list to Wiki class
-  //   console.log('Saved card index list');
-  //   Wiki.indexList = charIDs;
-  // }
-
   public static async buildCardIndex(): Promise<void> {
     const indexPage = [
       'https://puyonexus.com/wiki/PPQ:Card_Index/By_Number/1',
@@ -594,8 +558,36 @@ class Wiki {
     return filePages;
   }
 
+  public static async getRawText(pageTitle: string): Promise<string | undefined> {
+    const rawText = await fetch(`https://puyonexus.com/wiki/${pageTitle}?action=raw`)
+      .then((res) => {
+        if (res.status === 200) {
+          return res.text();
+        }
+      })
+      .then((data) => data)
+      .catch(() => undefined);
+
+    return rawText;
+  }
+
+  public static async getSeriesIDFromPage(seriesName: string): Promise<string | undefined> {
+    const pageTitle = `Category:PPQ:${seriesName}`;
+    const rawText = await this.getRawText(pageTitle);
+    if (!rawText) return;
+    const regMatch = rawText?.match(/{{(.*?)\|/);
+    const id = regMatch && regMatch[1];
+    return id || undefined;
+  }
+
   public static async getFilesFromSeriesName(seriesName: string): Promise<string[] | undefined> {
     const pageTitle = `Category:PPQ:${seriesName}`;
+    const files = await Wiki.getFilesOnPage(pageTitle);
+    return files;
+  }
+
+  public static async getFilesFromSeriesID(seriesID: string): Promise<string[] | undefined> {
+    const pageTitle = `Template:${seriesID}`;
     const files = await Wiki.getFilesOnPage(pageTitle);
     return files;
   }
@@ -760,6 +752,14 @@ class Wiki {
 
     if (!rawText) return;
 
+    // Check if the character is actually in this template. Sometimes the wiki has them
+    // coded with the same series number, even though they aren't...
+    const id4 = charID.slice(0, 4);
+    const matcher = new RegExp(`char\\d=${id4}|char\\d\\d=${id4}`);
+    if (!matcher.test(rawText)) {
+      return '';
+    }
+
     return getTemplateValue(rawText, 'name');
   }
 
@@ -884,6 +884,138 @@ class Wiki {
       .catch(() => undefined);
 
     return members;
+  }
+
+  /**
+   * Swiss army knife command to get a card's data. It accepts a name, alias, or jp name along with an optional rarity
+   * @param cardReqMsg '<Name|Alias|JPName> [rarity#]'
+   */
+  public static async getCard(cardReqMsg: string): Promise<Card | undefined> {
+    if (cardReqMsg.length === 0) return;
+    if (!Wiki.indexByJPName || !Wiki.indexByNormalizedName) return;
+
+    // Parse requested name and rarity
+    const parsedNameAndRarity = parseCardReqMsg(cardReqMsg, false);
+    let [name] = parsedNameAndRarity;
+    const [, rarity] = parsedNameAndRarity;
+    let slashColor = '';
+
+    // Remove /Color from fodder cards
+    if (/\/red|\/blue|\/green|\/yellow|\/purple/.test(name.toLowerCase())) {
+      [name, slashColor] = name.split('/');
+    }
+
+    // Check if the name is an aliased name
+    name = (await getNameFromAlias(name.toLowerCase())) || name;
+
+    // Fix fodder cards
+    if (slashColor) {
+      name = name.split('/')[0] + '/' + titleCase(slashColor);
+    }
+
+    if (Wiki.isJP(name)) {
+      const indexData = Wiki.indexByJPName.get(name);
+      if (indexData && indexData.name) {
+        name = indexData.name;
+      } else {
+        const potentialName = await Wiki.getCharName(name);
+        if (potentialName) {
+          name = potentialName;
+        } else {
+          return;
+        }
+      }
+    }
+
+    // If the card can be found in the cached card index, use that.
+    // Else, need to query the wiki a couple times to get the proper name, link name, and rarity
+    const indexData = Wiki.indexByNormalizedName.get(
+      name
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, ''),
+    );
+
+    const card = await (async function (): Promise<Card | undefined> {
+      if (
+        indexData &&
+        indexData.id &&
+        indexData.id !== '0000' &&
+        indexData.name &&
+        indexData.linkName &&
+        indexData.rarestid
+      ) {
+        // Gemini Saga exception
+        if (cardReqMsg.toLowerCase().includes('evil') && indexData.id === '4362' && rarity === '6') {
+          indexData.id = '5362';
+        } else if (cardReqMsg.toLowerCase().includes('divine') && indexData.id === '5362' && rarity === '6') {
+          indexData.id = '4362';
+        }
+
+        const fullCardID = rarity ? getFullCardID(indexData.id, rarity) : indexData.rarestid;
+        // Try to retrieve card page from wiki.
+        const rawText = await Wiki.getRawCardData(fullCardID);
+        if (!rawText) {
+          return;
+        }
+
+        const cardData = await parseTemplateText(rawText);
+        return cardData;
+      } else {
+        // Update the name if it leads to a redirect
+        const redirectName = await Wiki.checkCharRedirect(
+          name
+            .replace(/\s/g, '_')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, ''),
+        );
+        if (redirectName) {
+          if (name !== redirectName) {
+            name = redirectName;
+          }
+        } else {
+          return;
+        }
+
+        let charID = await Wiki.getCharID(name);
+        // Gemini Saga exception
+        if (cardReqMsg.toLowerCase().includes('evil') && charID === '4362') {
+          charID = '5362';
+        } else if (cardReqMsg.toLowerCase().includes('divine') && charID === '5362') {
+          charID = '4362';
+        }
+
+        if (!charID) return;
+
+        // I should refactor getCharRarities to not include the star.
+        const rarities = await (await Wiki.getCharRarities(name.replace(/\s/g, '_'))).map((rarity) =>
+          rarity.replace(/★/g, ''),
+        );
+
+        const fullCardID = rarity
+          ? getFullCardID(charID, rarity)
+          : getFullCardID(charID, rarities[rarities.length - 1]);
+
+        const rawText = await Wiki.getRawCardData(fullCardID);
+        if (!rawText) {
+          return;
+        }
+
+        const cardData = await parseTemplateText(rawText);
+        return cardData;
+      }
+    })();
+
+    return card;
+  }
+
+  /**
+   * Discord's Markdown parser on mobile doesn't play nicely with nested parantheses, so replace them with their
+   * URI versions. encodeURI() can't be used for this because it ignores parentheses.
+   * @param str URL
+   */
+  public static encodeSafeURL(str: string): string {
+    return str.replace(/\s/g, '_').replace('(', '%28').replace(')', '%29');
   }
 }
 
