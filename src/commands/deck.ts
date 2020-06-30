@@ -57,9 +57,18 @@ const command: Command = {
     const data: Card[] = [];
     for (let i = 0; i < cardReqs.length; i++) {
       const card = await Wiki.getCard(cardReqs[i]);
-      if (card) data.push(card);
+      if (card) {
+        data.push(card);
+      } else {
+        message.channel.send(`Error: Couldn't parse [${cardReqs[i]}]`);
+      }
     }
     const validData = data.filter((d) => !!d);
+
+    if (validData.length === 0) {
+      msg.edit(`Error: No cards were found.`);
+      return;
+    }
 
     // Calculate available combinations
     const combinations = cardCombinations(validData);

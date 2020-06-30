@@ -134,12 +134,12 @@ async function sendCardEmbed(
 
   if (cardData.ast2)
     em.addField(
-      `[AS+] ${cardData.ast2} (${cardData.jpast2}) [${activationPuyo[cardData.color.toLowerCase()]}×${cardData.astn}]`,
+      `[AS+] ${cardData.ast2} (${cardData.jpast2}) [${activationPuyo[cardData.color.toLowerCase()]}×${cardData.ast2n}]`,
       cardData.ast2e,
     );
   if (cardData.ast3)
     em.addField(
-      `[AS+] ${cardData.ast3} (${cardData.jpast3}) [${activationPuyo[cardData.color.toLowerCase()]}×${cardData.astn}]`,
+      `[AS+] ${cardData.ast3} (${cardData.jpast3}) [${activationPuyo[cardData.color.toLowerCase()]}×${cardData.ast3n}]`,
       cardData.ast3e,
     );
 

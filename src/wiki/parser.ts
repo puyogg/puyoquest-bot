@@ -27,12 +27,14 @@ interface Card {
   ase: string; // Active skill explanation
   asfe: string; // Full power skill explanation
   ast: string;
-  ast2: string;
-  ast2e: string;
-  ast3: string;
-  ast3e: string;
   astn: string; // Special Training Skill activation number
   aste: string; // Special Training Skill explanation
+  ast2: string;
+  ast2n: string;
+  ast2e: string;
+  ast3: string;
+  ast3n: string;
+  ast3e: string;
   jpast: string; // JP training skill name. Usually just * except for Powerpro-kun
   jpast2: string;
   jpast3: string;
@@ -68,8 +70,10 @@ interface BackAST {
   astn: string;
   aste: string;
   ast2: string;
+  ast2n: string;
   ast2e: string;
   ast3: string;
+  ast3n: string;
   ast3e: string;
   jpast: string;
   jpast2: string;
@@ -318,8 +322,10 @@ async function parseTemplateText(text: string): Promise<Card> {
       ast: getCardTemplateValue(r, 'ast'),
       aste: getCardTemplateValue(r, 'aste', true),
       ast2: getCardTemplateValue(r, 'ast2'),
+      ast2n: getCardTemplateValue(r, 'ast2n'),
       ast2e: getCardTemplateValue(r, 'ast2e', true),
       ast3: getCardTemplateValue(r, 'ast3'),
+      ast3n: getCardTemplateValue(r, 'ast3n'),
       ast3e: getCardTemplateValue(r, 'ast3e', true),
       jpast: getCardTemplateValue(r, 'jpast'),
       jpast2: getCardTemplateValue(r, 'jpast2'),
