@@ -419,6 +419,7 @@ const titleCasingExceptions: TitleCasingExceptions = {
   '/purple': '/Purple',
   npc: 'NPC',
   'W/o': 'w/o',
+  Snowprincess: 'SnowPrincess',
 };
 
 function normalizeTitle(inputName: string): string {
