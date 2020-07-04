@@ -457,13 +457,20 @@ function parseCardReqMsg(message: string, isCommand = true): [string, string | n
   // Check if the last character is a number preceeded by a space.
   // That's the rarity number.
   // const hasRarity = /\s+(?=\d)/.test(msg.slice(msg.length - 2, msg.length));
+  // const hasRarity = (function (): boolean {
+  //   const split = msg.split(' ');
+  //   if (/^\d+$/.test(split[split.length - 1].replace(/-|s|S/g, ''))) {
+  //     return true;
+  //   } else {
+  //     return false;
+  //   }
+  // })();
+
   const hasRarity = (function (): boolean {
     const split = msg.split(' ');
-    if (/^\d+$/.test(split[split.length - 1].replace(/-|s|S/g, ''))) {
-      return true;
-    } else {
-      return false;
-    }
+    const last = split[split.length - 1];
+    if (last === '24') return false; // Exception for Schezo ver. Division 24
+    return /^\d+$/.test(split[split.length - 1].replace(/-|s|S/g, ''));
   })();
 
   if (hasRarity) {
