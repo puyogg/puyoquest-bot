@@ -41,6 +41,12 @@ async function sendCardEmbed(
   linkName: string,
   rarity: string,
 ): Promise<void> {
+  // Make sure rarity is in the right form. Don't accept things like: ?c Staff Raffina 777777
+  if (!/^\d-\d$|^\d$|^\ds$/.test(rarity)) {
+    message.channel.send(`Error: Invalid rarity: ★${rarity}`);
+    return;
+  }
+
   const fullCardID = getFullCardID(id, rarity);
   // Try to retrieve card page from wiki.
   const rawText = await Wiki.getRawCardData(fullCardID);
