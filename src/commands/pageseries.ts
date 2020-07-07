@@ -47,7 +47,7 @@ async function makeMessageOptions(files: string[], pageTitle: string): Promise<D
   charIDs.forEach((charID) => {
     const card = Wiki.indexByID && Wiki.indexByID.get(charID);
     if (card) {
-      charLinks.push(`[[${card.name}]](https://puyonexus.com/wiki/${card.linkName})`);
+      charLinks.push(`[[${card.name}]](https://puyonexus.com/wiki/PPQ:${card.linkName})`);
       validCharIDs.push(charID);
     }
   });
