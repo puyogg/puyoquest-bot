@@ -127,8 +127,10 @@ export default {
     // Get username from Discord ID
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
-      const member = await guild.members.fetch(row['user_id']);
-      const userName = member?.displayName || member?.nickname || member?.user.username || '?';
+      const member = await guild.members.fetch(row['user_id']).catch(() => undefined);
+      const userName = member
+        ? member?.displayName || member?.nickname || member?.user.username || 'Unknown username'
+        : 'Unknown user';
 
       const obj: LeaderboardObj = {
         // eslint-disable-next-line @typescript-eslint/camelcase

@@ -13,8 +13,9 @@ const command: Command = {
   aliases: [],
   category: ['puyoquest'],
   async execute(message: Discord.Message, args: string[]): Promise<void> {
-    // Only admins can use this command
-    if (!message.member?.hasPermission('ADMINISTRATOR')) {
+    // Only moderators can use this command
+    // if (!message.member?.hasPermission('ADMINISTRATOR')) {
+    if (!message.member?.hasPermission('BAN_MEMBERS')) {
       return;
     }
 

@@ -16,9 +16,9 @@ loadImage(path.resolve(__dirname, '../images/deck_template.png'))
 const name = path.parse(__filename).name;
 
 const command: Command = {
-  name: name, // admin
-  usage: ['admin <set-channel|rm-channel> <quest-channel|event-channel>'],
-  description: 'Set or change bot settings.',
+  name: name, // deck
+  usage: ['?deck [name #] [name #] ...'],
+  description: 'Display a sample deck.',
   args: false,
   aliases: [],
   category: ['puyoquest'],
