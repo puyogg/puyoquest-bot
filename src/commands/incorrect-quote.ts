@@ -78,7 +78,7 @@ export default {
 
       // Write text
       const memeText = message.content.split(']')[1].trim();
-      console.log(memeText);
+      // console.log(memeText);
       ctx.font = '32px Ubuntu';
       ctx.fillStyle = '#1360be';
       // ctx.fillText(memeText, 280, 120);
@@ -107,7 +107,7 @@ export default {
       fullMessage = fullMessage === '' ? fullMessage + line : fullMessage + '\n' + line;
       ctx.fillText(fullMessage, x, y - (rows - 1) * 20);
 
-      console.log(ctx.measureText(fullMessage));
+      // console.log(ctx.measureText(fullMessage));
 
       const buffer = canvas.toBuffer();
       message.reply({
