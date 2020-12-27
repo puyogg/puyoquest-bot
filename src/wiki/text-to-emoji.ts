@@ -72,7 +72,7 @@ const wikiTextToEmoji: WikiTextToEmoji = {
   'Green Reflection [] []': '<:green_reflection:714902436845977601>',
   'Yellow Reflection [] []': '<:yellow_reflection:714902480663740579>',
   'Purple Reflection [] []': '<:purple_reflection:714902513182048336>',
-  'Turn Plus [] []': ':clock10:',
+  'Turn Plus [] []': '<:turnplus:792819466965745675>',
   'Fatigue [] []': '<:fatigue:792794784582336522>',
   'Feigned [] []': '<:feigned:792794784556646400>',
   'Red Amplification [] []': '<:amp_red:792794784506314752>',
