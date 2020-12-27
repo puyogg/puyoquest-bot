@@ -16,6 +16,15 @@ loadImage(path.resolve(__dirname, '../images/bubble_left.png'))
   .then((image) => (bubbleLeft = image))
   .catch(() => console.error('There was a problem loading the bubble image.'));
 
+let toroChan: Image;
+loadImage(path.resolve(__dirname, '../images/torochan.png'))
+  .then((image) => (toroChan = image))
+  .catch(() => console.error('There was a problem loading the cat image.'));
+
+let toroChanCard: Image;
+loadImage(path.resolve(__dirname, '../images/torochan_card.png'))
+  .then((image) => (toroChanCard = image))
+  .catch(() => console.error('There was a problem loading the cat image.'));
 // Retrieve command name from filename
 const name = path.parse(__filename).name;
 
@@ -61,20 +70,31 @@ export default {
 
     // Single character
     if (cardReqs.length == 1) {
-      const card = await Wiki.getCard(cardReqs[0]);
+      let faImg;
 
-      if (!card) {
-        message.reply(`Invalid request: ${cardReqs[0]}`);
-        return;
-      }
+      console.log(cardReqs[0]);
+      if (
+        cardReqs[0].toLowerCase() === 'toro-chan' ||
+        cardReqs[0].toLowerCase() === 'torochan' ||
+        cardReqs[0].toLowerCase() === `maguro's cat`
+      ) {
+        faImg = toroChan;
+      } else {
+        const card = await Wiki.getCard(cardReqs[0]);
 
-      // Download full art
-      const faURL = await Wiki.getImageURL(`File:Img${card.code}_l.png`);
-      if (!faURL) {
-        message.reply(`Couldn't find full art for ${cardReqs[0]}`);
-        return;
+        if (!card) {
+          message.reply(`Invalid request: ${cardReqs[0]}`);
+          return;
+        }
+
+        // Download full art
+        const faURL = await Wiki.getImageURL(`File:Img${card.code}_l.png`);
+        if (!faURL) {
+          message.reply(`Couldn't find full art for ${cardReqs[0]}`);
+          return;
+        }
+        faImg = await loadImage(faURL);
       }
-      const faImg = await loadImage(faURL);
 
       const canvas = createCanvas(960, 540);
       const ctx = canvas.getContext('2d');
@@ -124,13 +144,21 @@ export default {
         files: [buffer],
       });
     } else if (cardReqs.length > 1) {
-      const data: Card[] = [];
+      const data: (Card | 'toro')[] = [];
       for (let i = 0; i < cardReqs.length; i++) {
-        const card = await Wiki.getCard(cardReqs[i]);
-        if (card) {
-          data.push(card);
+        if (
+          cardReqs[i].toLowerCase() === 'toro-chan' ||
+          cardReqs[i].toLowerCase() === 'torochan' ||
+          cardReqs[i].toLowerCase() === `maguro's cat`
+        ) {
+          data.push('toro');
         } else {
-          message.channel.send(`Error: Couldn't parse [${cardReqs[i]}]`);
+          const card = await Wiki.getCard(cardReqs[i]);
+          if (card) {
+            data.push(card);
+          } else {
+            message.channel.send(`Error: Couldn't parse [${cardReqs[i]}]`);
+          }
         }
       }
 
@@ -145,11 +173,16 @@ export default {
       const icons: Image[] = [];
       for (let i = 0; i < validData.length; i++) {
         const card = validData[i];
-        if (!card) continue;
-        const iconURL = await Wiki.getImageURL(`File:Img${card.code}.png`);
-        if (!iconURL) continue;
-        const icon = await loadImage(iconURL);
-        icons.push(icon);
+
+        if (card === 'toro') {
+          icons.push(toroChanCard);
+        } else {
+          if (!card) continue;
+          const iconURL = await Wiki.getImageURL(`File:Img${card.code}.png`);
+          if (!iconURL) continue;
+          const icon = await loadImage(iconURL);
+          icons.push(icon);
+        }
       }
 
       // Get text to say
