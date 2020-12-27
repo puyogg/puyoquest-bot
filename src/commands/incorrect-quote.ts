@@ -110,7 +110,7 @@ export default {
       // console.log(ctx.measureText(fullMessage));
 
       const buffer = canvas.toBuffer();
-      message.reply({
+      message.channel.send({
         files: [buffer],
       });
     } else if (cardReqs.length > 1) {
@@ -204,7 +204,7 @@ export default {
       }
 
       const buffer = canvas.toBuffer();
-      message.reply({
+      message.channel.send({
         files: [buffer],
       });
     }
