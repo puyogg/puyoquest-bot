@@ -188,17 +188,12 @@ async function sendCardEmbed(
 
   const combinationsText = combinationLinks.join(' ');
 
-  const links = rarities.map((rarity) => {
-    const url = `https://puyonexus.com/wiki/PPQ:${linkName}/${rarity}`.replace('(', '%28').replace(')', '%29');
-    return `[[${rarity}]](${url})`;
-  });
-
   // em.addField('\u200b', links.join(' '));
 
   if (cardSeries) {
-    em.setDescription(`${seriesText} ${combinationsText}\n${links.join(' ')}`);
+    em.setDescription(`${seriesText} ${combinationsText}`);
   } else {
-    em.setDescription(`${combinationsText}\n${links.join(' ')}`);
+    em.setDescription(`${combinationsText}`);
   }
 
   message.channel.send(em);
