@@ -51,6 +51,11 @@ interface Card {
   bslv: string;
   bsn: string;
   bse: string;
+  ca: string; // Cross Ability
+  jpca: string;
+  calv: string;
+  can: string;
+  cae: string;
   combin1: string;
   combin2: string;
   combin3: string;
@@ -287,6 +292,11 @@ async function parseTemplateText(text: string): Promise<Card> {
     bslv: getCardTemplateValue(rows, 'bslv'),
     bsn: getCardTemplateValue(rows, 'bsn'),
     bse: getCardTemplateValue(rows, 'bse', true),
+    ca: getCardTemplateValue(rows, 'ca'),
+    jpca: getCardTemplateValue(rows, 'jpca'),
+    calv: getCardTemplateValue(rows, 'calv'),
+    can: getCardTemplateValue(rows, 'can'),
+    cae: getCardTemplateValue(rows, 'cae', true),
     combin1: getCardTemplateValue(rows, 'combin1', true),
     combin2: getCardTemplateValue(rows, 'combin2', true),
     combin3: getCardTemplateValue(rows, 'combin3', true),
@@ -395,6 +405,7 @@ async function parseTemplateText(text: string): Promise<Card> {
   if (cardData.lst3e) cardData.lst3e = await parseSkillText(cardData.lst3e);
   if (cardData.bse) cardData.bse = await parseSkillText(cardData.bse);
   if (cardData.sse) cardData.sse = await parseSkillText(cardData.sse);
+  if (cardData.cae) cardData.cae = await parseSkillText(cardData.cae);
 
   return cardData;
 }

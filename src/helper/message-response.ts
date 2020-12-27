@@ -159,6 +159,15 @@ async function sendCardEmbed(
     );
   }
 
+  if (cardData.ca) {
+    em.addField(
+      `[CA] ${cardData.ca}${(cardData.calv && ` Lv. ${cardData.calv}`) || ''} (${cardData.jpca}${
+        (cardData.calv && ` Lv. ${cardData.calv}`) || ''
+      }) [${activationPuyo[cardData.color.toLowerCase()]}×${cardData.can}]`,
+      cardData.cae,
+    );
+  }
+
   const seriesData = await Wiki.getCardSeries(id);
   const cardSeries = seriesData && entities.decode(seriesData);
 
@@ -179,10 +188,17 @@ async function sendCardEmbed(
 
   const combinationsText = combinationLinks.join(' ');
 
+  const links = rarities.map((rarity) => {
+    const url = `https://puyonexus.com/wiki/PPQ:${linkName}/${rarity}`.replace('(', '%28').replace(')', '%29');
+    return `[[${rarity}]](${url})`;
+  });
+
+  // em.addField('\u200b', links.join(' '));
+
   if (cardSeries) {
-    em.setDescription(`${seriesText} ${combinationsText}`);
+    em.setDescription(`${seriesText} ${combinationsText}\n${links.join(' ')}`);
   } else {
-    em.setDescription(combinationsText);
+    em.setDescription(`${combinationsText}\n${links.join(' ')}`);
   }
 
   message.channel.send(em);

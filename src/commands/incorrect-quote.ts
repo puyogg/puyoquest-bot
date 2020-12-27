@@ -2,7 +2,7 @@ import * as path from 'path';
 import { Command } from '../command-info';
 import * as Discord from 'discord.js';
 import { Wiki } from '../wiki/api';
-import { loadImage, Image, createCanvas, Canvas, CanvasRenderingContext2D } from 'canvas';
+import { loadImage, Image, createCanvas, Canvas } from 'canvas';
 import { Card } from '../wiki/parser';
 
 // Load outside the command to keep it cached.
