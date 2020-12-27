@@ -108,7 +108,7 @@ const command: Command = {
       fullMessage = fullMessage === '' ? fullMessage + line : fullMessage + '\n' + line;
       ctx.fillText(fullMessage, x, y - (rows - 1) * lineHeight);
 
-      console.log(ctx.measureText(fullMessage));
+      // console.log(ctx.measureText(fullMessage));
 
       const buffer = canvas.toBuffer();
       message.reply({

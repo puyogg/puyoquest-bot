@@ -72,7 +72,7 @@ export default {
     if (cardReqs.length == 1) {
       let faImg;
 
-      console.log(cardReqs[0]);
+      // console.log(cardReqs[0]);
       if (
         cardReqs[0].toLowerCase() === 'toro-chan' ||
         cardReqs[0].toLowerCase() === 'torochan' ||
