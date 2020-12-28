@@ -79,7 +79,7 @@ const command: Command = {
       } else if (int < 65) {
         memeText = `Maybe you're the mistake.`;
       } else if (int < 70) {
-        memeText = `Do you really fight to protect your friends? Because I saw your wallet crying today.`;
+        memeText = `Are you prepared to eat cup ramen for the next 24 years?`;
       } else if (int < 90) {
         memeText = 'Hell no.';
       } else if (int < 100) {
