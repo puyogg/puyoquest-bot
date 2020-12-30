@@ -80,6 +80,8 @@ const command: Command = {
         memeText = `Maybe you're the mistake.`;
       } else if (int < 70) {
         memeText = `Are you prepared to eat cup ramen for the next 24 years?`;
+      } else if (int < 80) {
+        memeText = `You will regret your hubris.\n- Xin, Dec 30 2020`;
       } else if (int < 90) {
         memeText = 'Hell no.';
       } else if (int < 100) {
