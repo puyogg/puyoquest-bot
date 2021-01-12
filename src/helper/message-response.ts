@@ -181,6 +181,7 @@ async function sendCardEmbed(
   if (cardData.combin3) combinations.push(cardData.combin3);
   if (cardData.combin4) combinations.push(cardData.combin4);
   if (cardData.combin5) combinations.push(cardData.combin5);
+  if (cardData.combin6) combinations.push(cardData.combin6);
 
   const combinationLinks = combinations.map((combination) => {
     return `[[${combination}]](https://puyonexus.com/wiki/Category:PPQ:${combination.replace(/\s/g, '_')}_Combination)`;

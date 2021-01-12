@@ -61,6 +61,7 @@ interface Card {
   combin3: string;
   combin4: string;
   combin5: string;
+  combin6: string;
   ss: string;
   jpss: string;
   sslv: string;
@@ -302,6 +303,7 @@ async function parseTemplateText(text: string): Promise<Card> {
     combin3: getCardTemplateValue(rows, 'combin3', true),
     combin4: getCardTemplateValue(rows, 'combin4', true),
     combin5: getCardTemplateValue(rows, 'combin5', true),
+    combin6: getCardTemplateValue(rows, 'combin6', true),
     ss: getCardTemplateValue(rows, 'ss'),
     jpss: getCardTemplateValue(rows, 'jpss'),
     sslv: getCardTemplateValue(rows, 'sslv'),
