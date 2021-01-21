@@ -2,6 +2,7 @@ import { loadImage, Image, createCanvas, Canvas } from 'canvas';
 import * as path from 'path';
 import { PUYONAME, PUYOTYPE } from './solver/constants';
 import { get2d } from './solver/helper';
+import { TsuRNG } from './rng/index';
 
 interface PuyoSprites {
   [index: string]: Canvas[];
@@ -11,6 +12,15 @@ interface PuyoSprites {
   yellow: Canvas[];
   purple: Canvas[];
   garbage: Canvas[];
+}
+
+interface FieldOptions {
+  character?: string;
+  puyoSkin?: string;
+  fieldString: string;
+  colorSeed: number;
+  seedPosition: number;
+  chainLength: number;
 }
 
 // Load assets
@@ -24,6 +34,7 @@ loadImage(path.resolve(__dirname, '../../images/sim/field_son.png'))
   .catch(() => console.error(`There was a proble loading the field background.`));
 let puyoSkin: Image;
 let puyoSprites: PuyoSprites;
+let redX: Canvas;
 loadImage(path.resolve(__dirname, '../../images/sim/puyo_gummy.png'))
   .then((image) => {
     puyoSkin = image;
@@ -56,19 +67,30 @@ loadImage(path.resolve(__dirname, '../../images/sim/puyo_gummy.png'))
       sprites['garbage'].push(canvas);
     }
 
+    // Red X
+    {
+      const canvas = createCanvas(64, 60);
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(puyoSkin, 5 * 72, 11 * 72, 64, 60, 0, 0, 64, 60);
+      redX = canvas;
+    }
+
     puyoSprites = sprites;
   })
-  .catch(() => console.error(`There was a proble loading the field background.`));
+  .catch(() => console.error(`There was a problem loading the field background.`));
 
-interface FieldOptions {
-  character?: string;
-  puyoSkin?: string;
-  fieldString?: string;
-}
+let nextWindow: Image;
+loadImage(path.resolve(__dirname, '../../images/sim/next_template.png'))
+  .then((image) => (nextWindow = image))
+  .catch(() => console.error(`There was a problem loading the next window texture.`));
 
-function drawPuyos(options?: FieldOptions): Canvas {
+function drawPuyos(options: FieldOptions): Canvas {
   const canvas = createCanvas(384, 780);
   const ctx = canvas.getContext('2d');
+
+  // Draw Red X on the bottom
+  ctx.drawImage(redX, 0, 0, 64, 60, 2 * 64, 60, 64, 60);
+
   if (!options || !options.fieldString) {
     return canvas;
   }
@@ -101,7 +123,7 @@ function drawPuyos(options?: FieldOptions): Canvas {
   return canvas;
 }
 
-function drawField(options?: FieldOptions): Canvas {
+function drawField(options: FieldOptions): Canvas {
   const canvas = createCanvas(548, 868);
   const ctx = canvas.getContext('2d');
   const puyoCanvas = drawPuyos(options);
@@ -111,10 +133,25 @@ function drawField(options?: FieldOptions): Canvas {
   return canvas;
 }
 
-export function drawGame(options?: FieldOptions): Canvas {
-  const fieldCanvas = drawField(options);
-  const canvas = createCanvas(900, 870);
+function drawNextWindow(options: FieldOptions): Canvas {
+  const canvas = createCanvas(139, 285);
   const ctx = canvas.getContext('2d');
+  ctx.drawImage(nextWindow, 0, 0);
+
+  // Parse the Tsu RNG
+  // TsuRNG.getPools(options, this.colorOrder).color4;
+
+  return canvas;
+}
+
+export function drawGame(options: FieldOptions): Canvas {
+  const fieldCanvas = drawField(options);
+  const nextWindowCanvas = drawNextWindow(options);
+  const canvas = createCanvas(700, 870);
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = 'black';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(fieldCanvas, 0, 0);
+  ctx.drawImage(nextWindowCanvas, 510, 60);
   return canvas;
 }

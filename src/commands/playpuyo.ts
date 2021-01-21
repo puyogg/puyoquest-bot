@@ -5,6 +5,7 @@ import { Wiki } from '../wiki/api';
 import { loadImage, Image, createCanvas, Canvas } from 'canvas';
 import { Card } from '../wiki/parser';
 import { drawGame } from '../helper/sim/draw';
+import { ChainSolver } from '../helper/sim/solver';
 
 // Retrieve command name from filename
 const name = path.parse(__filename).name;
@@ -31,22 +32,49 @@ export default {
   aliases: ['pp'],
   category: ['puyoquest'],
   async execute(message: Discord.Message, args: string[]): Promise<void> {
-    // const canvas = createCanvas(900, 870);
-    // const ctx = canvas.getContext('2d');
+    let fieldString = args.length > 0 ? args[0] : new Array(6 * 13).fill(0).join('');
+    const colorSeed = args.length > 1 ? parseInt(args[1], 10) : Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+    const seedPosition = args.length > 2 ? parseInt(args[2], 10) : 0;
 
-    // ctx.drawImage(fieldBG, 0, 0, 400, 724, 74, 89, 400, 724);
-    // ctx.drawImage(fieldBorder, 0, 0);
-    console.log(args);
+    // Check if colorSeed or seedPosition is NaN
+    if (Number.isNaN(colorSeed)) {
+      message.channel.send(`Error: Invalid color seed.`);
+      return;
+    }
+
+    if (Number.isNaN(seedPosition)) {
+      message.channel.send(`Error: Invalid seed position.`);
+      return;
+    }
+
+    // Pad field string if it's less than 78 characters
+    if (fieldString.length < 78) {
+      const zeros = new Array(78 - fieldString.length).fill(0).join('');
+      fieldString = zeros + fieldString;
+    } else if (fieldString.length > 78) {
+      message.channel.send(`Error: Invalid field string (longer than 78 characters)`);
+      return;
+    }
+
+    // Use ChainSolver to check if the current chain pops.
+    const solver = new ChainSolver(Array.from(fieldString).map((str) => parseInt(str, 10)));
+    solver.simulate();
+    const chainLength = solver.states[solver.states.length - 1].chainLength;
+    message.channel.send(`Chain Length: ${chainLength}`);
+
     const canvas = drawGame({
-      // fieldString: '311502444423226552233623366523223463434622223462423465435645423564235645235645',
+      // fieldString: '321502444423226552233623366523223463434622223462423465435645423564235645235645',
       fieldString: args.length > 0 ? args[0] : new Array(6 * 13).fill(0).join(''),
+      colorSeed: colorSeed,
+      seedPosition: seedPosition,
+      chainLength: chainLength,
     });
     // Get PNG buffer
     const buffer = canvas.toBuffer('image/png');
 
     // Send the message, and get a reference to the successfully sent message
     const msg = await message.channel.send({
-      files: [buffer],
+      files: [buffer, buffer],
     });
 
     const actions = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '🔄', '🔁'];
