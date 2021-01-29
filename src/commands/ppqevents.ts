@@ -124,8 +124,9 @@ export default {
     em.setDescription(
       `This list was generated at: ${time.year}/${time.month}/${time.day} ${time.hour}:${time.minute} JST`,
     );
-    em.addField('Ongoing Events', ongoing);
-    em.addField('Upcoming Events', upcoming);
+
+    if (ongoing) em.addField('Ongoing Events', ongoing);
+    if (upcoming) em.addField('Upcoming Events', upcoming);
     em.setURL(`https://puyonexus.com/wiki/PPQ:Event_News_Archive/${time.monthLong}_${time.year}`);
     message.channel.send(em);
   },
