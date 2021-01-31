@@ -2,12 +2,20 @@ import * as path from 'path';
 import * as Discord from 'discord.js';
 import { Command } from '../command-info';
 import { Wiki, EventData } from '../wiki/api';
-import { DateTime } from 'luxon';
+import { DateTime, Duration } from 'luxon';
 
 // Retrieve command name from filename
 const name = path.parse(__filename).name;
 
 function parseTime(timeStr: string): DateTime {
+  if (!timeStr) {
+    const time = DateTime.fromObject({ zone: 'Asia/Tokyo' });
+    const duration = Duration.fromObject({
+      years: 24,
+    });
+
+    return time.plus(duration);
+  }
   const [year, month, day] = timeStr
     .split(' ')[0]
     .split('/')
@@ -30,11 +38,13 @@ function parseTime(timeStr: string): DateTime {
 }
 
 function showRemaining(end: DateTime): string {
-  const diff = end.diffNow(['days', 'hours']);
+  const diff = end.diffNow(['years', 'months', 'days', 'hours']);
   let days = 0;
   let hours = 0;
-  // console.log(diff.days, diff.hours);
-  if (diff.hours < 0) {
+  const years = 0;
+  if (diff.years > 1) {
+    return `2424 years`;
+  } else if (diff.hours < 0) {
     days = Math.floor(diff.days + diff.hours / 24);
     hours = Math.floor(24 + diff.hours);
   } else {

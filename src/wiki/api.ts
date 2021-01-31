@@ -380,6 +380,21 @@ class Wiki {
       })
       .filter((event) => {
         // Filter out events that had already passed.
+        // Exception if the event is still in (preview)
+        if (!event.end) {
+          const [yearEnd, monthEnd, dayEnd] = [2424, 2, 24];
+          const [hourEnd, minuteEnd] = [2, 24];
+          const endTime = DateTime.fromObject({
+            year: yearEnd,
+            month: monthEnd,
+            day: dayEnd,
+            hour: hourEnd,
+            minute: minuteEnd,
+            zone: 'Asia/Tokyo',
+          });
+          return endTime > time;
+        }
+
         const [yearEnd, monthEnd, dayEnd] = event.end
           .split(' ')[0]
           .split('/')
