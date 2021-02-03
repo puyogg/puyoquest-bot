@@ -82,6 +82,11 @@ const wikiTextToEmoji: WikiTextToEmoji = {
   'Damage Up [] []': '<:dmgup:792794784443793428>',
   'Blue Amplification [] []': '<:amp_blue:792794784132497420>',
   'Green Amplification [] []': '<:amp_green:792794784028164117>',
+  'Red Plus Puyo []': '<:PlusPuyo_Red:806533287035928617>',
+  'Green Plus Puyo []': '<:PlusPuyo_Green:806533286867894273>',
+  'Blue Plus Puyo []': '<:PlusPuyo_Blue:806533287139999745>',
+  'Yellow Plus Puyo []': '<:PlusPuyo_Yellow:806533287152844870>',
+  'Purple Plus Puyo []': '<:PlusPuyo_Purple:806533287157432340>',
 };
 
 export { wikiTextToEmoji };
