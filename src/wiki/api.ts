@@ -449,11 +449,12 @@ class Wiki {
   public static async buildCardIndex(): Promise<void> {
     const indexPage = [
       'https://puyonexus.com/wiki/PPQ:Card_Index/By_Number/1',
-      'https://puyonexus.com/wiki/PPQ:Card_Index/By_Number/2',
-      'https://puyonexus.com/wiki/PPQ:Card_Index/By_Number/3',
-      'https://puyonexus.com/wiki/PPQ:Card_Index/By_Number/4',
-      'https://puyonexus.com/wiki/PPQ:Card_Index/By_Number/5',
-      'https://puyonexus.com/wiki/PPQ:Card_Index/NPC',
+      'https://puyonexus.com/wiki/PPQ:Card_Index/By_Number/101',
+      'https://puyonexus.com/wiki/PPQ:Card_Index/By_Number/201',
+      'https://puyonexus.com/wiki/PPQ:Card_Index/By_Number/301',
+      'https://puyonexus.com/wiki/PPQ:Card_Index/By_Number/401',
+      'https://puyonexus.com/wiki/PPQ:Card_Index/By_Number/501',
+      'https://puyonexus.com/wiki/PPQ:Card_Index/UIC',
     ];
 
     const cardIndex: IndexData[] = [];
