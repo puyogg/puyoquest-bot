@@ -1,4 +1,4 @@
-FROM node:14
+FROM node:14.16.0
 EXPOSE 2424
 
 # App directory

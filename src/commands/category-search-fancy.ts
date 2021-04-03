@@ -92,16 +92,12 @@ const command: Command = {
 
     message.channel.send('Downloading images...');
 
-    // Display an image containing all the cards
-    const icons: Image[] = [];
-    for (let i = 0; i < subset.length; i++) {
-      const card = subset[i];
-      if (!card.imgFile) continue;
-      const iconURL = await Wiki.getImageURL(card.imgFile);
-      if (!iconURL) continue;
-      const icon = await loadImage(iconURL);
-      icons.push(icon);
-    }
+    // Run the icon downloads asynchronously
+    const iconURLs = await Promise.all(
+      subset.map((card) => (card.imgFile ? Wiki.getImageURL(card.imgFile) : undefined)),
+    );
+    const iconsAll = await Promise.all(iconURLs.map((url) => (url ? loadImage(url) : undefined)));
+    const icons = iconsAll.filter((img) => img !== undefined) as Image[];
 
     const height = Math.ceil(icons.length / 5) * icons[0].height;
     const width = icons[0].width * 5;
@@ -116,12 +112,59 @@ const command: Command = {
 
     const buffer = canvas.toBuffer();
 
+    // Build fields without exceeding character limits.
+    let i = 0;
+    let nextLink = '';
+    let description = '';
+    const descriptionMaxChar = 2048;
+
+    while (i < subset.length) {
+      // Get current indexes's link
+      const card = subset[i];
+      nextLink = `[[${card.name}]](https://puyonexus.com/wiki/PPQ:${card.linkName}) `;
+
+      // Add the link to the description text if it won't exceed the character limit
+      if (description.length + nextLink.length > descriptionMaxChar) {
+        break;
+      } else {
+        description += nextLink;
+        i++;
+      }
+    }
+
+    const fieldTexts: string[] = [];
+
+    for (let t = 0; t < 5; t++) {
+      let fieldText = '';
+      const fieldMaxChar = 1024;
+      while (i < subset.length) {
+        const card = subset[i];
+        nextLink = `[[${card.name}]](https://puyonexus.com/wiki/PPQ:${card.linkName}) `;
+        // Add the link to the field text if it won't exceed the character limit
+        if (fieldText.length + nextLink.length > fieldMaxChar) {
+          break;
+        } else {
+          fieldText += nextLink;
+          i++;
+        }
+      }
+
+      if (fieldText.length === 0) {
+        break;
+      }
+      fieldTexts.push(fieldText);
+    }
+
     const em = new Discord.MessageEmbed();
     em.setTitle(category.title);
     em.setURL(`https://puyonexus.com/wiki/${searchResult[0].title.replace(/\s/g, '_')}`);
-    em.setDescription(
-      subset.map((card) => `[[${card.name}]](https://puyonexus.com/wiki/PPQ:${card.linkName})`).join(' '),
-    );
+    // em.setDescription(
+    //   subset.map((card) => `[[${card.name}]](https://puyonexus.com/wiki/PPQ:${card.linkName})`).join(' '),
+    // );
+    em.setDescription(description);
+    fieldTexts.forEach((text) => {
+      em.addField('...', text);
+    });
     em.setImage('attachment://file.png');
     message.channel.send({
       embed: em,
