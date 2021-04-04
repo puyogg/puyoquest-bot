@@ -24,6 +24,9 @@ client.on('message', (message) => {
   // Check if message starts with bot prefix. Don't listen to any messages from bots.
   if (!message.content.startsWith(BOT_PREFIX) || message.author.bot) return;
 
+  // Ignore webhook messages.
+  if (message.webhookID) return;
+
   // // Show user's message if dev mode is on
   // if (devmode) console.log(message.author.username, message.content);
 

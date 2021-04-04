@@ -94,10 +94,13 @@ const command: Command = {
 
     // Run the icon downloads asynchronously
     const iconURLs = await Promise.all(
-      subset.map((card) => (card.imgFile ? Wiki.getImageURL(card.imgFile) : undefined)),
+      subset.map((card) => {
+        if (!card.imgFile) return undefined;
+
+        return Wiki.getImageURL(card.imgFile).then((url) => (url ? loadImage(url) : undefined));
+      }),
     );
-    const iconsAll = await Promise.all(iconURLs.map((url) => (url ? loadImage(url) : undefined)));
-    const icons = iconsAll.filter((img) => img !== undefined) as Image[];
+    const icons = iconURLs.filter((img) => img !== undefined) as Image[];
 
     const height = Math.ceil(icons.length / 5) * icons[0].height;
     const width = icons[0].width * 5;
