@@ -5,14 +5,11 @@ services:
     depends_on:
       - postgres
     environment:
-      PORT: 2424
       BOT_TOKEN: '${BOT_TOKEN}' # ${} pulled from .env in same directory
       DATABASE_URL: 'postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}'
       BOT_PREFIX: '${BOT_PREFIX}'
     volumes:
       - ./src:/usr/src/app/src
-    ports:
-      - '2424:2424'
 
   postgres:
     image: postgres:latest

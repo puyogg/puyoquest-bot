@@ -25,6 +25,17 @@ let toroChanCard: Image;
 loadImage(path.resolve(__dirname, '../images/torochan_card.png'))
   .then((image) => (toroChanCard = image))
   .catch(() => console.error('There was a problem loading the cat image.'));
+
+let johnSega: Image;
+loadImage(path.resolve(__dirname, '../images/johnsega.png'))
+  .then((image) => (johnSega = image))
+  .catch(() => console.error('There was a problem loading John SEGA'));
+
+let johnSegaCard: Image;
+loadImage(path.resolve(__dirname, '../images/johnsega_card.png'))
+  .then((image) => (johnSegaCard = image))
+  .catch(() => console.error('There was a problem loading John SEGA'));
+
 // Retrieve command name from filename
 const name = path.parse(__filename).name;
 
@@ -79,6 +90,13 @@ export default {
         cardReqs[0].toLowerCase() === `maguro's cat`
       ) {
         faImg = toroChan;
+      } else if (
+        cardReqs[0].toLowerCase() === 'john sega' ||
+        cardReqs[0].toLowerCase() === 'johnsega' ||
+        cardReqs[0].toLowerCase() === `sega john` ||
+        cardReqs[0].toLowerCase() === `segajohn`
+      ) {
+        faImg = johnSega;
       } else {
         const card = await Wiki.getCard(cardReqs[0]);
 
@@ -144,7 +162,7 @@ export default {
         files: [buffer],
       });
     } else if (cardReqs.length > 1) {
-      const data: (Card | 'toro')[] = [];
+      const data: (Card | 'toro' | 'johnsega')[] = [];
       for (let i = 0; i < cardReqs.length; i++) {
         if (
           cardReqs[i].toLowerCase() === 'toro-chan' ||
@@ -152,6 +170,13 @@ export default {
           cardReqs[i].toLowerCase() === `maguro's cat`
         ) {
           data.push('toro');
+        } else if (
+          cardReqs[0].toLowerCase() === 'john sega' ||
+          cardReqs[0].toLowerCase() === 'johnsega' ||
+          cardReqs[0].toLowerCase() === `sega john` ||
+          cardReqs[0].toLowerCase() === `segajohn`
+        ) {
+          data.push('johnsega');
         } else {
           const card = await Wiki.getCard(cardReqs[i]);
           if (card) {
@@ -176,6 +201,8 @@ export default {
 
         if (card === 'toro') {
           icons.push(toroChanCard);
+        } else if (card === 'johnsega') {
+          icons.push(johnSegaCard);
         } else {
           if (!card) continue;
           const iconURL = await Wiki.getImageURL(`File:Img${card.code}.png`);
