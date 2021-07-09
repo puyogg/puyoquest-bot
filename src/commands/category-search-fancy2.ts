@@ -35,6 +35,7 @@ const command: Command = {
       return;
     } else if (requestedBrackets.length > 4) {
       message.channel.send(`Error: You requested too many categories to search on. The limit is 4.`);
+      return;
     }
     const requestedCategories = requestedBrackets.map((match) => 'Category:PPQ:' + match.replace(/\[|\]/g, ''));
 
