@@ -59,7 +59,7 @@ interface WikiSearch extends WikiLookup {
   timestamp: string;
 }
 
-interface WikiSearchDist extends WikiSearch {
+export interface WikiSearchDist extends WikiSearch {
   leven: number;
   accuracy: number;
 }
@@ -547,8 +547,13 @@ class Wiki {
   //   }
   // }
 
-  public static getRandomCard(): IndexData | undefined {
+  public static getRandomCard(cards?: IndexData[]): IndexData | undefined {
     if (!Wiki.cardIndex) return;
+
+    if (cards && cards.length > 0) {
+      const i = Math.floor(Math.random() * cards.length);
+      return cards[i];
+    }
 
     const i = Math.floor(Math.random() * Wiki.cardIndex.length);
     return Wiki.cardIndex[i];
@@ -882,22 +887,43 @@ class Wiki {
   }
 
   public static async getCategoryMembers(categoryPage: string): Promise<string[] | undefined> {
-    const url = Wiki.url({
+    let url = Wiki.url({
       action: 'query',
       format: 'json',
       list: 'categorymembers',
       cmtitle: categoryPage,
-      cmlimit: '1000',
+      cmlimit: '500',
     });
 
-    const members = await fetch(url)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && data.query && data.query.categorymembers) {
-          return (data.query.categorymembers as WikiLookup[]).map((d) => d.title);
-        }
-      })
-      .catch(() => undefined);
+    let hasContinue = true;
+    const members: string[] = [];
+    let cmcontinue = '';
+
+    while (hasContinue) {
+      const newMembers = await fetch(url)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data?.continue) {
+            cmcontinue = data.continue.cmcontinue;
+            url = Wiki.url({
+              action: 'query',
+              format: 'json',
+              list: 'categorymembers',
+              cmtitle: categoryPage,
+              cmlimit: '500',
+              continue: data.continue.continue,
+              cmcontinue: cmcontinue,
+            });
+          } else {
+            hasContinue = false;
+          }
+
+          if (data?.query?.categorymembers) {
+            return (data.query.categorymembers as WikiLookup[]).map((d) => d.title);
+          }
+        });
+      if (newMembers) members.push(...newMembers);
+    }
 
     return members;
   }

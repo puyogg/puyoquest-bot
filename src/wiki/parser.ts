@@ -396,18 +396,52 @@ async function parseTemplateText(text: string): Promise<Card> {
   }
 
   // Parse wiki text of ase, lse, and bse
-  if (cardData.ase) cardData.ase = await parseSkillText(cardData.ase);
-  if (cardData.asfe) cardData.asfe = await parseSkillText(cardData.asfe);
-  if (cardData.aste) cardData.aste = await parseSkillText(cardData.aste);
-  if (cardData.ast2e) cardData.ast2e = await parseSkillText(cardData.ast2e);
-  if (cardData.ast3e) cardData.ast3e = await parseSkillText(cardData.ast3e);
-  if (cardData.lse) cardData.lse = await parseSkillText(cardData.lse);
-  if (cardData.lste) cardData.lste = await parseSkillText(cardData.lste);
-  if (cardData.lst2e) cardData.lst2e = await parseSkillText(cardData.lst2e);
-  if (cardData.lst3e) cardData.lst3e = await parseSkillText(cardData.lst3e);
-  if (cardData.bse) cardData.bse = await parseSkillText(cardData.bse);
-  if (cardData.sse) cardData.sse = await parseSkillText(cardData.sse);
-  if (cardData.cae) cardData.cae = await parseSkillText(cardData.cae);
+  // if (cardData.ase) cardData.ase = await parseSkillText(cardData.ase);
+  // if (cardData.asfe) cardData.asfe = await parseSkillText(cardData.asfe);
+  // if (cardData.aste) cardData.aste = await parseSkillText(cardData.aste);
+  // if (cardData.ast2e) cardData.ast2e = await parseSkillText(cardData.ast2e);
+  // if (cardData.ast3e) cardData.ast3e = await parseSkillText(cardData.ast3e);
+  // if (cardData.lse) cardData.lse = await parseSkillText(cardData.lse);
+  // if (cardData.lste) cardData.lste = await parseSkillText(cardData.lste);
+  // if (cardData.lst2e) cardData.lst2e = await parseSkillText(cardData.lst2e);
+  // if (cardData.lst3e) cardData.lst3e = await parseSkillText(cardData.lst3e);
+  // if (cardData.bse) cardData.bse = await parseSkillText(cardData.bse);
+  // if (cardData.sse) cardData.sse = await parseSkillText(cardData.sse);
+  // if (cardData.cae) cardData.cae = await parseSkillText(cardData.cae);
+
+  const toParse = [
+    cardData.ase,
+    cardData.asfe,
+    cardData.aste,
+    cardData.ast2e,
+    cardData.ast3e,
+    cardData.lse,
+    cardData.lste,
+    cardData.lst2e,
+    cardData.lst3e,
+    cardData.bse,
+    cardData.sse,
+    cardData.cae,
+  ];
+
+  [
+    cardData.ase,
+    cardData.asfe,
+    cardData.aste,
+    cardData.ast2e,
+    cardData.ast3e,
+    cardData.lse,
+    cardData.lste,
+    cardData.lst2e,
+    cardData.lst3e,
+    cardData.bse,
+    cardData.sse,
+    cardData.cae,
+  ] = await Promise.all(
+    toParse.map((wikitext) => {
+      return parseSkillText(wikitext);
+    }),
+  );
 
   return cardData;
 }
@@ -540,11 +574,44 @@ async function parseLoreTemplate(text: string): Promise<CharacterLore> {
     ],
   };
 
-  if (loreData.descriptionEN) loreData.descriptionEN = await parseSkillText(loreData.descriptionEN);
-  if (loreData.translator) loreData.translator = await parseSkillText(loreData.translator);
-  if (loreData.quotes[0].en) loreData.quotes[0].en = await parseSkillText(loreData.quotes[0].en);
-  if (loreData.quotes[1].en) loreData.quotes[1].en = await parseSkillText(loreData.quotes[1].en);
-  if (loreData.quotes[2].en) loreData.quotes[2].en = await parseSkillText(loreData.quotes[2].en);
+  // if (loreData.descriptionJP) loreData.descriptionJP = await parseSkillText(loreData.descriptionJP);
+  // if (loreData.descriptionEN) loreData.descriptionEN = await parseSkillText(loreData.descriptionEN);
+  // if (loreData.translator) loreData.translator = await parseSkillText(loreData.translator);
+  // if (loreData.quotes[0].jp) loreData.quotes[0].jp = await parseSkillText(loreData.quotes[0].jp);
+  // if (loreData.quotes[1].jp) loreData.quotes[1].jp = await parseSkillText(loreData.quotes[1].jp);
+  // if (loreData.quotes[2].jp) loreData.quotes[2].jp = await parseSkillText(loreData.quotes[2].jp);
+  // if (loreData.quotes[0].en) loreData.quotes[0].en = await parseSkillText(loreData.quotes[0].en);
+  // if (loreData.quotes[1].en) loreData.quotes[1].en = await parseSkillText(loreData.quotes[1].en);
+  // if (loreData.quotes[2].en) loreData.quotes[2].en = await parseSkillText(loreData.quotes[2].en);
+
+  const toParse = [
+    loreData.descriptionJP,
+    loreData.descriptionEN,
+    loreData.translator,
+    loreData.quotes[0].jp,
+    loreData.quotes[1].jp,
+    loreData.quotes[2].jp,
+    loreData.quotes[0].en,
+    loreData.quotes[1].en,
+    loreData.quotes[2].en,
+  ];
+
+  [
+    loreData.descriptionJP,
+    loreData.descriptionEN,
+    loreData.translator,
+    loreData.quotes[0].jp,
+    loreData.quotes[1].jp,
+    loreData.quotes[2].jp,
+    loreData.quotes[0].en,
+    loreData.quotes[1].en,
+    loreData.quotes[2].en,
+  ] = await Promise.all(
+    toParse.map((wikitext) => {
+      if (!wikitext) return '';
+      return parseSkillText(wikitext);
+    }),
+  );
 
   return loreData;
 }

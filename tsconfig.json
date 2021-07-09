@@ -5,6 +5,7 @@
     "rootDir": "./src",
     "outDir": "./built",
     "strict": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "sourceMap": true
   }
 }

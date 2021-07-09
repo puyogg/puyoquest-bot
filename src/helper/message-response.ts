@@ -225,7 +225,13 @@ async function sendRarityEmbed(
     return `[[${rarity}]](${url})`;
   });
 
-  em.setDescription(links.join(' '));
+  const seriesData = await Wiki.getCardSeries(id);
+  const cardSeries = seriesData && entities.decode(seriesData);
+  const seriesText = cardSeries
+    ? `[(${cardSeries})](https://puyonexus.com/wiki/Category:PPQ:${cardSeries.replace(/\s/g, '_')})`
+    : '';
+
+  em.setDescription(links.join(' ') + '\n' + seriesText);
   em.setColor(colorHexes[parseInt(id[0], 10) - 1]);
 
   // Skip requesting all the available image files if we already know the highest rarity.

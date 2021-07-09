@@ -1,24 +1,63 @@
 import * as Discord from 'discord.js';
 import fetch from 'node-fetch';
 import { getFullCardID, parseTemplateText } from '../wiki/parser';
-import { Wiki } from '../wiki/api';
+import { IndexData, Wiki } from '../wiki/api';
 import { createCanvas, loadImage, Image } from 'canvas';
 import * as path from 'path';
 
 class TenRoll {
   private message: Discord.Message;
+  private names: string[];
+  private cards: IndexData[] | undefined;
 
   constructor(message: Discord.Message) {
     this.message = message;
+    this.names = [];
+
+    const name = message.member?.displayName || message.member?.nickname;
+    if (!name) return;
+    const normalizedName = name.toLowerCase();
+
+    if (/^capitalis./i.test(normalizedName)) {
+      this.names.push('raffina');
+    } else if (/^xin/i.test(normalizedName)) {
+      this.names.push('legamunt', 'rozatte', 'yuri', 'hartman', 'latos');
+    } else if (
+      [/^res$/i, /^albert/i, /^richard/i, /^matthew/i, /^miriam/i, /^sullivan/i].some((name) =>
+        name.test(normalizedName),
+      )
+    ) {
+      this.names.push('albert', 'richard', 'matthew', 'miriam', 'sullivan');
+    } else if (/SEGA/i.test(normalizedName)) {
+      this.names.push('kitty', 'paprisu');
+    } else if (/^lain/i.test(normalizedName)) {
+      this.names.push('shigure');
+    } else if (/^野狼院ひさし/i.test(normalizedName)) {
+      this.names.push('bald', 'balbal');
+    } else if (/Jeff/i.test(normalizedName)) {
+      this.names.push('tee');
+    } else if (/^pi$/i.test(normalizedName)) {
+      this.names.push('ecolo', 'finlay');
+    }
+
+    if (this.names.length > 0) {
+      this.cards = Wiki.cardIndex?.filter((card) => {
+        return this.names.some((name) => {
+          if (!card.normalizedName) return;
+          const nameRegExp = new RegExp(name, 'ig');
+          return nameRegExp.test(card.normalizedName);
+        });
+      });
+    }
   }
 
   /**
    * Gets a random icon from the card index and returns the canvas loaded image
    */
   private async getRandomIcon(): Promise<Image | undefined> {
-    let randCard = Wiki.getRandomCard();
+    let randCard = Wiki.getRandomCard(this.cards);
     while (randCard && randCard.id && ['1239', '2239', '3239', '4239', '5239', '1238'].includes(randCard.id)) {
-      randCard = Wiki.getRandomCard();
+      randCard = Wiki.getRandomCard(this.cards);
     }
     if (!randCard || !randCard.id || !randCard.name) {
       this.message.channel.send(`Error: There was a problem fetching the card list.`);

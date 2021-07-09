@@ -5,3 +5,5 @@ services:
       NODE_ENV: 'development'
     tty: true # Keep dev container alive
     command: npm run dev
+    ports:
+      - 39229:9229

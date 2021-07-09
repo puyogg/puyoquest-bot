@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint '*/**/*.{js,json,ts,tsx}' --quiet --fix",
     "tsc": "tsc",
-    "dev": "cross-env ts-node-dev --respawn --poll --watch 'src/**/*' --transpileOnly ./src/index.ts",
+    "dev": "cross-env ts-node-dev --inspect=0.0.0.0 --respawn --poll --watch 'src/**/*' --transpileOnly ./src/index.ts",
     "prod": "tsc && cp -ar src/sql built && cp -ar src/images built && node built/index.js"
   },
   "author": "@s2lsoftener",
