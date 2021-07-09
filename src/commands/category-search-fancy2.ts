@@ -114,7 +114,7 @@ const command: Command = {
     // chulap/red not found !!csfancy [cards inflicting fury] [balance type]
     // 41 instead of 43 !!csfancy [hp type][cards inflicting attack up]
     // Missing space ecolo !!csfancy [card cost 64]
-    console.log(validMembers);
+    // console.log(validMembers);
     message.channel.send(`Found ${validMembers.length} cards.`);
 
     // Look up card data from the card index
