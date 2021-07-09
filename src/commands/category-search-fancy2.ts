@@ -20,7 +20,7 @@ const command: Command = {
   usage: ['csfancy'],
   description: 'Link to a page in the PPQ section of the wiki',
   args: true,
-  aliases: ['csfancy2'],
+  aliases: ['csfancy2', 'csf2'],
   category: ['puyoquest'],
   async execute(message: Discord.Message): Promise<void> {
     // const regexpMatch = args[args.length - 1].match(/\[(.*?)\]/);
