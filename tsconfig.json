@@ -6,6 +6,6 @@
     "outDir": "./built",
     "strict": true,
     "resolveJsonModule": true,
-    "sourceMap": false
+    "sourceMap": true
   }
 }

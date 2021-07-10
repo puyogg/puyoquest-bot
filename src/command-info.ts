@@ -22,6 +22,7 @@ function getCommands(dirPath: string): Discord.Collection<string, Command> {
   const cmdFiles = fs
     .readdirSync(dirPath, { withFileTypes: true })
     .filter((dirent) => dirent.isFile())
+    .filter((dirent) => dirent.name.endsWith('.ts') || dirent.name.endsWith('.js'))
     .map((dirent) => dirPath + `/${dirent.name}`);
 
   cmdFiles.forEach((cmdFile) => {

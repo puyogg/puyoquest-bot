@@ -367,43 +367,22 @@ class Wiki {
       .split('{{EventNews')
       .filter((str) => str.length > 0);
 
-    const events = rawEvents
-      .map((event) => {
-        return {
-          name: getTemplateValue(event, 'name'),
-          jpname: getTemplateValue(event, 'jpname'),
-          start: getTemplateValue(event, 'start'),
-          end: getTemplateValue(event, 'end'),
-          link: getTemplateValue(event, 'link'),
-          feature: getTemplateValue(event, 'feature').replace(/{{/g, ''),
-        };
-      })
-      .filter((event) => {
-        // Filter out events that had already passed.
-        // Exception if the event is still in (preview)
-        if (!event.end) {
-          const [yearEnd, monthEnd, dayEnd] = [2424, 2, 24];
-          const [hourEnd, minuteEnd] = [2, 24];
-          const endTime = DateTime.fromObject({
-            year: yearEnd,
-            month: monthEnd,
-            day: dayEnd,
-            hour: hourEnd,
-            minute: minuteEnd,
-            zone: 'Asia/Tokyo',
-          });
-          return endTime > time;
-        }
-
-        const [yearEnd, monthEnd, dayEnd] = event.end
-          .split(' ')[0]
-          .split('/')
-          .map((num) => parseInt(num, 10));
-        const [hourEnd, minuteEnd] = event.end
-          .split(' ')[1]
-          .split(':')
-          .map((num) => parseInt(num, 10));
-
+    const events = rawEvents.map((event) => {
+      return {
+        name: getTemplateValue(event, 'name'),
+        jpname: getTemplateValue(event, 'jpname'),
+        start: getTemplateValue(event, 'start'),
+        end: getTemplateValue(event, 'end'),
+        link: getTemplateValue(event, 'link'),
+        feature: getTemplateValue(event, 'feature').replace(/{{/g, ''),
+      };
+    });
+    const validEvents = events.filter((event) => {
+      // Filter out events that had already passed.
+      // Exception if the event is still in (preview)
+      if (!event.end) {
+        const [yearEnd, monthEnd, dayEnd] = [2424, 2, 24];
+        const [hourEnd, minuteEnd] = [2, 24];
         const endTime = DateTime.fromObject({
           year: yearEnd,
           month: monthEnd,
@@ -412,11 +391,34 @@ class Wiki {
           minute: minuteEnd,
           zone: 'Asia/Tokyo',
         });
-
         return endTime > time;
+      }
+
+      const [yearEnd, monthEnd, dayEnd] = event.end
+        .split(' ')[0]
+        .split('/')
+        .map((num) => parseInt(num, 10));
+      const [hourEnd, minuteEnd] =
+        event.end.split(' ').length > 1
+          ? event.end
+              .split(' ')[1]
+              .split(':')
+              .map((num) => parseInt(num, 10))
+          : [23, 59];
+
+      const endTime = DateTime.fromObject({
+        year: yearEnd,
+        month: monthEnd,
+        day: dayEnd,
+        hour: hourEnd,
+        minute: minuteEnd,
+        zone: 'Asia/Tokyo',
       });
 
-    return events;
+      return endTime > time;
+    });
+
+    return validEvents;
   }
 
   /**

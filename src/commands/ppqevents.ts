@@ -7,7 +7,7 @@ import { DateTime, Duration } from 'luxon';
 // Retrieve command name from filename
 const name = path.parse(__filename).name;
 
-function parseTime(timeStr: string): DateTime {
+function parseTime(timeStr: string, isStartTime: boolean): DateTime {
   if (!timeStr) {
     const time = DateTime.fromObject({ zone: 'Asia/Tokyo' });
     const duration = Duration.fromObject({
@@ -20,10 +20,15 @@ function parseTime(timeStr: string): DateTime {
     .split(' ')[0]
     .split('/')
     .map((num) => parseInt(num, 10));
-  const [hour, minute] = timeStr
-    .split(' ')[1]
-    .split(':')
-    .map((num) => parseInt(num, 10));
+  const [hour, minute] =
+    timeStr.split(' ').length > 1
+      ? timeStr
+          .split(' ')[1]
+          .split(':')
+          .map((num) => parseInt(num, 10))
+      : isStartTime
+      ? [15, 0]
+      : [23, 59];
 
   const time = DateTime.fromObject({
     year: year,
@@ -96,36 +101,34 @@ export default {
     const time = DateTime.fromObject({ zone: 'Asia/Tokyo' });
 
     const ongoingEvents = events.filter((event) => {
-      const startTime = parseTime(event.start);
+      const startTime = parseTime(event.start, true);
       return startTime <= time;
     });
 
     const upcomingEvents = events.filter((event) => {
-      const startTime = parseTime(event.start);
+      const startTime = parseTime(event.start, true);
       return startTime > time;
     });
 
     const em = new Discord.MessageEmbed();
     em.setTitle(`Timed events for ${time.monthLong} ${time.year}`);
 
-    ongoingEvents.sort((a, b) => parseTime(a.end).toMillis() - parseTime(b.end).toMillis());
-    let ongoing = '';
-    ongoingEvents.forEach((event) => {
-      const endTime = parseTime(event.end);
+    ongoingEvents.sort((a, b) => parseTime(a.end, false).toMillis() - parseTime(b.end, false).toMillis());
+    // let ongoing = '';
+    const ongoingEventsLines = ongoingEvents.map((event) => {
+      const endTime = parseTime(event.end, false);
       const diffHours = endTime.diff(time, 'hours').toObject()['hours'];
       if (diffHours === undefined) return;
-      ongoing += `•${diffHours < 24 ? '🚨' : ''}**${event.name} (${event.jpname})**: Ends in ${showRemaining(
-        endTime,
-      )}\n`;
+      return `•${diffHours < 24 ? '🚨' : ''}**${event.name} (${event.jpname})**: Ends in ${showRemaining(endTime)}\n`;
     });
 
-    upcomingEvents.sort((a, b) => parseTime(a.start).toMillis() - parseTime(b.start).toMillis());
-    let upcoming = '';
-    upcomingEvents.forEach((event) => {
-      const startTime = parseTime(event.start);
+    upcomingEvents.sort((a, b) => parseTime(a.start, true).toMillis() - parseTime(b.start, true).toMillis());
+    // let upcoming = '';
+    const upcomingEventsLines = upcomingEvents.map((event) => {
+      const startTime = parseTime(event.start, true);
       const diffHours = startTime.diff(time, 'hours').toObject()['hours'];
       if (diffHours === undefined) return;
-      upcoming += `•${diffHours < 24 ? '🔔' : ''}**${event.name} (${event.jpname})**: Starts in ${showRemaining(
+      return `•${diffHours < 24 ? '🔔' : ''}**${event.name} (${event.jpname})**: Starts in ${showRemaining(
         startTime,
       )}\n`;
       // upcoming += `Ends: ${event.end}\n\n`;
@@ -135,8 +138,33 @@ export default {
       `This list was generated at: ${time.year}/${time.month}/${time.day} ${time.hour}:${time.minute} JST`,
     );
 
-    if (ongoing) em.addField('Ongoing Events', ongoing);
-    if (upcoming) em.addField('Upcoming Events', upcoming);
+    // if (ongoing) em.addField('Ongoing Events', ongoing);
+    // if (upcoming) em.addField('Upcoming Events', upcoming);
+
+    let ongoingText = '';
+    let ongoingTitle = 'Ongoing Events';
+    for (const line of ongoingEventsLines) {
+      if ((ongoingText + line).length > 1024) {
+        em.addField(ongoingTitle, ongoingText);
+        ongoingText = '';
+        ongoingTitle = 'Ongoing Events (cont.)';
+      }
+      ongoingText += line;
+    }
+    if (ongoingText) em.addField(ongoingTitle, ongoingText);
+
+    let upcomingText = '';
+    let upcomingTitle = 'Upcoming Events';
+    for (const line of upcomingEventsLines) {
+      if ((upcomingText + line).length > 1024) {
+        em.addField(upcomingTitle, upcomingText);
+        upcomingText = '';
+        upcomingTitle = 'Upcoming Events (cont.)';
+      }
+      upcomingText += line;
+    }
+    if (upcomingText) em.addField(upcomingTitle, upcomingText);
+
     em.setURL(`https://puyonexus.com/wiki/PPQ:Event_News_Archive/${time.monthLong}_${time.year}`);
     message.channel.send(em);
   },
