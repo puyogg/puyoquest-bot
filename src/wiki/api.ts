@@ -523,32 +523,6 @@ class Wiki {
     });
   }
 
-  // public static async getRandomCard(): Promise<{ id: string; name: string } | undefined> {
-  //   if (!Wiki.cardIndex) return;
-
-  //   const attempts = 24;
-  //   for (let i = 0; i < attempts; i++) {
-  //     const indexData = Wiki.cardIndex[Math.floor(Math.random() * Wiki.cardIndex.length)];
-  //     if (!indexData.id) continue;
-  //     const randID = indexData.id;
-  //     const nameReqURL = `https://puyonexus.com/mediawiki/api.php?action=parse&format=json&text=%7B%7B${randID}%7Cindex2%7D%7D&contentmodel=wikitext`;
-  //     const templateData: string = await fetch(nameReqURL)
-  //       .then((res) => res.json())
-  //       .then((data) => data.parse.text['*']);
-  //     const name = templateData.slice(
-  //       templateData.indexOf('title="') + 'title="'.length,
-  //       templateData.indexOf('">', templateData.indexOf('title="') + 'title="'.length),
-  //     );
-
-  //     // Check if a valid card was found
-  //     if (name.includes('page does not exist')) {
-  //       continue;
-  //     } else {
-  //       return { id: randID, name: name };
-  //     }
-  //   }
-  // }
-
   public static getRandomCard(cards?: IndexData[]): IndexData | undefined {
     if (!Wiki.cardIndex) return;
 

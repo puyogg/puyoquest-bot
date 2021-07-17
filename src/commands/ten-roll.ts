@@ -14,7 +14,7 @@ const command: Command = {
   args: true,
   aliases: ['tenroll', 'seek-my-own-destruction'],
   category: ['puyoquest'],
-  cooldown: 5,
+  cooldown: 10,
   async execute(message: Discord.Message): Promise<void> {
     // Don't use this command if the bot isn't fully loaded
     if (!(Wiki.cardIndex && Wiki.indexByID && Wiki.indexByJPName && Wiki.indexByNormalizedName)) return;

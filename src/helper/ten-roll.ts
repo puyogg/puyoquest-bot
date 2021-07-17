@@ -1,14 +1,15 @@
 import * as Discord from 'discord.js';
-import fetch from 'node-fetch';
 import { getFullCardID, parseTemplateText } from '../wiki/parser';
 import { IndexData, Wiki } from '../wiki/api';
 import { createCanvas, loadImage, Image } from 'canvas';
+import { CacheMap } from '../helper/cache-map';
 import * as path from 'path';
 
 class TenRoll {
   private message: Discord.Message;
   private names: string[];
   private cards: IndexData[] | undefined;
+  private static cache = new CacheMap<IndexData[]>(60 * 60 * 1000);
 
   constructor(message: Discord.Message) {
     this.message = message;
@@ -20,8 +21,38 @@ class TenRoll {
 
     if (/^capitalis./i.test(normalizedName)) {
       this.names.push('raffina');
+    } else if (/^JustVibin$/i.test(normalizedName)) {
+      this.names.push('raffina', 'lidelle', 'yu & rei');
+    } else if (/^TrophyHunter$/i.test(normalizedName)) {
+      this.names.push('tilura', 'marvett', 'rozema', 'bestoll', 'algar');
+    } else if (/^Maihen$/i.test(normalizedName)) {
+      this.names.push(
+        'isin',
+        'eridu',
+        'rukbat',
+        'yogi',
+        'henriette',
+        'melville',
+        'komone',
+        'taningoat',
+        'sheepro',
+        'tondury',
+      );
+    } else if (/^Cass$/i.test(normalizedName)) {
+      this.names.push(
+        'strange klug',
+        'ms. accord',
+        'satan',
+        'ecolo',
+        'dark arle',
+        'lemres',
+        'rafisol',
+        'carbuncle',
+        'ex',
+        'doppelganger arle',
+      );
     } else if (/^xin/i.test(normalizedName)) {
-      this.names.push('legamunt', 'rozatte', 'yuri', 'hartman', 'latos');
+      this.names.push('legamunt', 'rozatte', 'yuri', 'hartman');
     } else if (
       [/^res$/i, /^albert/i, /^richard/i, /^matthew/i, /^miriam/i, /^sullivan/i].some((name) =>
         name.test(normalizedName),
@@ -41,13 +72,23 @@ class TenRoll {
     }
 
     if (this.names.length > 0) {
-      this.cards = Wiki.cardIndex?.filter((card) => {
-        return this.names.some((name) => {
-          if (!card.normalizedName) return;
-          const nameRegExp = new RegExp(name, 'ig');
-          return nameRegExp.test(card.normalizedName);
+      const key = this.names.join(',');
+      const { item: indexData, useCache } = TenRoll.cache.get(key);
+      if (useCache) {
+        console.log(`${new Date().toString()}: Using filtered card index from cache.`);
+        this.cards = indexData;
+      } else {
+        console.log(`${new Date().toString()}: Fetching filtered card index to build cache.`);
+        const fetchedData = Wiki.cardIndex?.filter((card) => {
+          return this.names.some((name) => {
+            if (!card.normalizedName) return;
+            const nameRegExp = new RegExp(name, 'ig');
+            return nameRegExp.test(card.normalizedName);
+          });
         });
-      });
+        this.cards = fetchedData || [];
+        TenRoll.cache.set(key, fetchedData || []);
+      }
     }
   }
 
