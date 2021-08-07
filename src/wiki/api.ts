@@ -485,12 +485,13 @@ class Wiki {
           const indexData: IndexData = {
             id: idMatch && idMatch[1].slice(0, 4),
             rarestid: idMatch && idMatch[1],
-            name: nameMatch && nameMatch[1],
+            name: nameMatch && nameMatch[1].replace('☆', ' '),
             normalizedName:
               nameMatch &&
               nameMatch[1]
                 .normalize('NFD')
                 .replace(/[\u0300-\u036f]/g, '')
+                .replace('☆', ' ')
                 .toLowerCase(),
             linkName: linkNameMatch && linkNameMatch[1].replace(/\s/g, '_'),
             imgFile: imgFileMatch && imgFileMatch[1],

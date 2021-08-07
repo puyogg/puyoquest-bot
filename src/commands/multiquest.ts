@@ -50,7 +50,7 @@ const command: Command = {
     const imgURL = character && (await Wiki.getImageURL(`File:Img${character.rarestid}.png`));
 
     const em = new Discord.MessageEmbed()
-      .setTitle('A Multiplayer Quest room has oppened!')
+      .setTitle('A Multiplayer Quest room has opened!')
       .addFields(
         {
           name: 'Room Name',
