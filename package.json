@@ -23,7 +23,7 @@
     "@types/ws": "^7.2.5",
     "@typescript-eslint/eslint-plugin": "^2.33.0",
     "@typescript-eslint/parser": "^2.33.0",
-    "canvas": "^2.6.1",
+    "canvas": "^2.8.0",
     "cross-env": "^7.0.2",
     "discord.js": "^12.2.0",
     "eslint": "^7.0.0",
