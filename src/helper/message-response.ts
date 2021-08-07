@@ -11,6 +11,7 @@ const activationPuyo: ColorToString = {
   green: '<:green:429944006948945931>',
   yellow: '<:yellow:429944006718521345>',
   purple: '<:purple:429944007397736448>',
+  h: '<:heartbox:792798475510612009>',
 };
 
 // function parseTime(timeStr: string): DateTime {
@@ -163,7 +164,9 @@ async function sendCardEmbed(
     em.addField(
       `[CA] ${cardData.ca}${(cardData.calv && ` Lv. ${cardData.calv}`) || ''} (${cardData.jpca}${
         (cardData.calv && ` Lv. ${cardData.calv}`) || ''
-      }) [${activationPuyo[cardData.color.toLowerCase()]}×${cardData.can}]`,
+      }) [${cardData.caalt ? activationPuyo[cardData.caalt] : activationPuyo[cardData.color.toLowerCase()]}×${
+        cardData.can
+      }]`,
       cardData.cae,
     );
   }

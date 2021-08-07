@@ -56,6 +56,7 @@ interface Card {
   calv: string;
   can: string;
   cae: string;
+  caalt: string; // Cross Ability alternate trigger?
   combin1: string;
   combin2: string;
   combin3: string;
@@ -297,6 +298,7 @@ async function parseTemplateText(text: string): Promise<Card> {
     jpca: getCardTemplateValue(rows, 'jpca'),
     calv: getCardTemplateValue(rows, 'calv'),
     can: getCardTemplateValue(rows, 'can'),
+    caalt: getCardTemplateValue(rows, 'caalt'),
     cae: getCardTemplateValue(rows, 'cae', true),
     combin1: getCardTemplateValue(rows, 'combin1', true),
     combin2: getCardTemplateValue(rows, 'combin2', true),
