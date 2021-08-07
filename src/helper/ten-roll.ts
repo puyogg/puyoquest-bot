@@ -54,11 +54,11 @@ class TenRoll {
     } else if (/^xin/i.test(normalizedName)) {
       this.names.push('legamunt', 'rozatte', 'yuri', 'hartman');
     } else if (
-      [/^res$/i, /^albert/i, /^richard/i, /^matthew/i, /^miriam/i, /^sullivan/i].some((name) =>
+      [/^res$/i, /^albert/i, /^richard/i, /^matthew/i, /^miriam/i, /^sullivan/i, /^roza/i].some((name) =>
         name.test(normalizedName),
       )
     ) {
-      this.names.push('albert', 'richard', 'matthew', 'miriam', 'sullivan');
+      this.names.push('albert', 'richard', 'matthew', 'miriam', 'sullivan', 'rozatte', 'bestoll', 'felix');
     } else if (/SEGA/i.test(normalizedName)) {
       this.names.push('kitty', 'paprisu');
     } else if (/^lain/i.test(normalizedName)) {
@@ -68,7 +68,27 @@ class TenRoll {
     } else if (/Jeff/i.test(normalizedName)) {
       this.names.push('tee');
     } else if (/^pi$/i.test(normalizedName)) {
-      this.names.push('ecolo', 'finlay');
+      this.names.push('ecolo', 'finlay', 'patri');
+    } else if (/super luigethan/i.test(normalizedName)) {
+      this.names.push(
+        'klug',
+        'gensan',
+        'sago',
+        'inoha',
+        'sora',
+        'gyura',
+        'chetta',
+        'lewis',
+        'needo',
+        'emilion',
+        'michelo',
+      );
+    } else if (/^luna/i.test(normalizedName)) {
+      this.names.push('hilda', 'eldur', 'wacht', 'friede', 'crowlas', 'mappela');
+    } else if (/^kirub/i.test(normalizedName)) {
+      this.names.push('chetta', 'lewis', 'needo', 'emilion', 'michelo', 'shark');
+    } else if (/matsu$/i.test(normalizedName)) {
+      this.names.push('matsu');
     }
 
     if (this.names.length > 0) {
