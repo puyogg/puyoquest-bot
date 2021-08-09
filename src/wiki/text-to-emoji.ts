@@ -87,6 +87,7 @@ const wikiTextToEmoji: WikiTextToEmoji = {
   'Blue Plus Puyo []': '<:PlusPuyo_Blue:806533287139999745>',
   'Yellow Plus Puyo []': '<:PlusPuyo_Yellow:806533287152844870>',
   'Purple Plus Puyo []': '<:PlusPuyo_Purple:806533287157432340>',
+  'Frozen [] []': '<:frozen:874414229329969275>',
 };
 
 export { wikiTextToEmoji };
