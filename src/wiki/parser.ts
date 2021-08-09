@@ -468,6 +468,7 @@ const titleCasingExceptions: TitleCasingExceptions = {
   '/purple': '/Purple',
   npc: 'NPC',
   'W/o': 'w/o',
+  ' Van ': ' van ',
   Snowprincess: 'SnowPrincess',
   ' No ': ' no ',
 };
