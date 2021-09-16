@@ -471,6 +471,7 @@ const titleCasingExceptions: TitleCasingExceptions = {
   ' Van ': ' van ',
   Snowprincess: 'SnowPrincess',
   ' No ': ' no ',
+  Puyoquest: 'PuyoQuest',
 };
 
 function normalizeTitle(inputName: string): string {
