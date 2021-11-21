@@ -10,6 +10,7 @@ services:
       BOT_PREFIX: '${BOT_PREFIX}'
     volumes:
       - ./src:/usr/src/app/src
+      - ./.git:/usr/src/app/.git
 
   postgres:
     image: postgres:latest

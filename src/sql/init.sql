@@ -1,3 +1,5 @@
+SET timezone = 'UTC';
+
 CREATE TABLE IF NOT EXISTS special_channels (
   server_id text PRIMARY KEY,
   quest_channel text,
@@ -36,4 +38,11 @@ CREATE TABLE IF NOT EXISTS ntcj_leaderboard (
   server_id text,
   correct integer,
   PRIMARY KEY(user_id, server_id)
+);
+
+CREATE TABLE IF NOT EXISTS image_cache (
+  external_url text,
+  filepath text,
+  updated_at timestamptz,
+  PRIMARY KEY(external_url)
 );
