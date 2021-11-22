@@ -155,7 +155,7 @@ const command: Command = {
     for (let i = 0; i < icons.length; i++) {
       const x = (i % 5) * IMAGE_WIDTH;
       const y = Math.floor(i / 5) * IMAGE_HEIGHT;
-      ctx.drawImage(icons[i], x, y, 96, 96);
+      ctx.drawImage(icons[i], x, y, IMAGE_WIDTH, IMAGE_HEIGHT);
     }
 
     const buffer = canvas.toBuffer();

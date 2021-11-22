@@ -1,15 +1,19 @@
 import { Wiki } from '../wiki/api';
 import { createCanvas, Image, loadImage } from 'canvas';
+import { ImageCache } from '../wiki/image-cache';
 
 async function getSeriesBanner(fileNames: string[]): Promise<Buffer | undefined> {
   if (fileNames.length === 0) return;
-  const icons: Image[] = [];
-  for (let i = 0; i < fileNames.length; i++) {
-    const iconURL = await Wiki.getImageURL(fileNames[i]);
-    if (!iconURL) continue;
-    const icon = await loadImage(iconURL);
-    icons.push(icon);
-  }
+  const icons = (
+    await Promise.all(
+      fileNames.map(async (fileName) => {
+        const iconURL = await Wiki.getImageURL(fileName);
+        if (!iconURL) return;
+        const iconBuffer = await ImageCache.get(iconURL);
+        return await loadImage(iconBuffer);
+      }),
+    )
+  ).filter((icon) => !!icon) as Image[];
 
   const canvas = createCanvas(icons[0].width * icons.length, icons[0].height);
   const ctx = canvas.getContext('2d');

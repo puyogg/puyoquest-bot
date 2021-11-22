@@ -4,6 +4,7 @@ import * as Discord from 'discord.js';
 import { Wiki } from '../wiki/api';
 import { loadImage, Image, createCanvas, Canvas } from 'canvas';
 import { Card } from '../wiki/parser';
+import { ImageCache } from '../wiki/image-cache';
 
 // Load outside the command to keep it cached.
 let bubble: Image;
@@ -207,7 +208,8 @@ export default {
           if (!card) continue;
           const iconURL = await Wiki.getImageURL(`File:Img${card.code}.png`);
           if (!iconURL) continue;
-          const icon = await loadImage(iconURL);
+          const iconBuffer = await ImageCache.get(iconURL);
+          const icon = await loadImage(iconBuffer);
           icons.push(icon);
         }
       }
