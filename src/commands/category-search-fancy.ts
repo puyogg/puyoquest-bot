@@ -102,7 +102,6 @@ const command: Command = {
         if (!card.imgFile) return undefined;
 
         const url = await Wiki.getImageURL(card.imgFile);
-        console.log('iconURL url', url);
 
         if (!url) return undefined;
 
