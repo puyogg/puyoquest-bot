@@ -62,7 +62,7 @@ const command: Command = {
     const data = await Promise.all(
       cardReqs.map(async (cardName) => {
         const card = await Wiki.getCard(cardName);
-        if (!card) message.channel.send(`Error: Couldn't parse [${cardReqs[i]}]`);
+        if (!card) message.channel.send(`Error: Couldn't parse [${cardName}]`);
         return card;
       }),
     );
