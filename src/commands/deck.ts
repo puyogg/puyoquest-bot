@@ -5,6 +5,7 @@ import { Wiki } from '../wiki/api';
 import { loadImage, Image, createCanvas } from 'canvas';
 import { Card } from '../wiki/parser';
 import { cardCombinations } from '../helper/char-combinations';
+import { ImageCache } from '../wiki/image-cache';
 
 // Have this loaded outside so it stays cached.
 let template: Image;
@@ -14,6 +15,9 @@ loadImage(path.resolve(__dirname, '../images/deck_template.png'))
 
 // Retrieve command name from filename
 const name = path.parse(__filename).name;
+
+const IMAGE_WIDTH = 96;
+const IMAGE_HEIGHT = 96;
 
 const command: Command = {
   name: name, // deck
@@ -54,16 +58,15 @@ const command: Command = {
     // I think Puyo Nexus's wiki api doesn't like me doing all the requests in parallel
     // with Promise.all, so here's the one-by-one await version instead.
     const msg = await message.channel.send('Querying the wiki...');
-    const data: Card[] = [];
-    for (let i = 0; i < cardReqs.length; i++) {
-      const card = await Wiki.getCard(cardReqs[i]);
-      if (card) {
-        data.push(card);
-      } else {
-        message.channel.send(`Error: Couldn't parse [${cardReqs[i]}]`);
-      }
-    }
-    const validData = data.filter((d) => !!d);
+
+    const data = await Promise.all(
+      cardReqs.map(async (cardName) => {
+        const card = await Wiki.getCard(cardName);
+        if (!card) message.channel.send(`Error: Couldn't parse [${cardReqs[i]}]`);
+        return card;
+      }),
+    );
+    const validData = data.filter((d) => !!d) as Card[];
 
     if (validData.length === 0) {
       msg.edit(`Error: No cards were found.`);
@@ -83,15 +86,17 @@ const command: Command = {
     // Create the image
     // Download all card icons.
     msg.edit('Downloading images...');
-    const icons: Image[] = [];
-    for (let i = 0; i < validData.length; i++) {
-      const card = validData[i];
-      if (!card) continue;
-      const iconURL = await Wiki.getImageURL(`File:Img${card.code}.png`);
-      if (!iconURL) continue;
-      const icon = await loadImage(iconURL);
-      icons.push(icon);
-    }
+    const icons: Image[] = (
+      await Promise.all(
+        validData.map(async (data) => {
+          if (!data) return;
+          const iconURL = await Wiki.getImageURL(`File:Img${data.code}.png`);
+          if (!iconURL) return;
+          const iconBuffer = await ImageCache.get(iconURL);
+          return loadImage(iconBuffer);
+        }),
+      )
+    ).filter((icon) => !!icon) as Image[];
 
     const canvas = createCanvas(630, 281);
     const ctx = canvas.getContext('2d');
@@ -101,9 +106,9 @@ const command: Command = {
       if (i === 0) {
         ctx.drawImage(icon, 26, 59, 160, 160);
       } else if (i >= 1 && i <= 4) {
-        ctx.drawImage(icon, 198 + (i - 1) * 104, 59);
+        ctx.drawImage(icon, 198 + (i - 1) * 104, 59, IMAGE_WIDTH, IMAGE_HEIGHT);
       } else if (i >= 5 && i <= 8) {
-        ctx.drawImage(icon, 198 + (i - 5) * 104, 59 + 104);
+        ctx.drawImage(icon, 198 + (i - 5) * 104, 59 + 104, IMAGE_WIDTH, IMAGE_HEIGHT);
       }
     }
 

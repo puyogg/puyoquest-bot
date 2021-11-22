@@ -4,6 +4,13 @@ import axios from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
 
+function diffMs(beforeJSDate: Date): number {
+  const now = DateTime.utc();
+  const before = DateTime.fromJSDate(beforeJSDate);
+  const diff = now.diff(before);
+  return diff.milliseconds;
+}
+
 export class ImageCache {
   public static cachePath = '/images';
   public static pnBaseUrl = 'https://puyonexus.com';
@@ -13,19 +20,18 @@ export class ImageCache {
     if (!url.startsWith(ImageCache.pnBaseUrl)) {
       throw Error('Image is not from Puyo Nexus');
     }
-    
-    const data = await db.oneOrNone(`SELECT * FROM image_cache WHERE external_url = $1`, [url]);
-    console.log(data);
 
-    const now = DateTime.utc();
-    const before = DateTime.fromJSDate(data['updated_at']);
-    const diff = now.diff(before);
-    const diffMs = diff.milliseconds;
-    
-    if (!data || forceDownload || diffMs >= ImageCache.expirationTime) {
+    const data = await db.oneOrNone(`SELECT * FROM image_cache WHERE external_url = $1`, [url]);
+
+    if (!data || forceDownload || (data && diffMs(data['updated_at']) >= ImageCache.expirationTime)) {
       return ImageCache.set(url);
     } else {
-      return fs.readFileSync(data['filepath']);
+      try {
+        return fs.readFileSync(data['filepath']);
+      } catch {
+        // In case the entry was in the database, but not actually on disk for some reason.
+        return ImageCache.set(url);
+      }
     }
   }
 

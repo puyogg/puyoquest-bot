@@ -3,6 +3,7 @@ import { Command } from '../command-info';
 import * as Discord from 'discord.js';
 import { Wiki, IndexData, WikiSearchDist } from '../wiki/api';
 import { Image, loadImage, createCanvas } from 'canvas';
+import { ImageCache } from '../wiki/image-cache';
 
 // Retrieve command name from filename
 const name = path.parse(__filename).name;
@@ -14,6 +15,9 @@ function isWikiSearchDistArray(searchResult: (WikiSearchDist[] | undefined)[]): 
 function isCategoryArrays(categorySet: (string[] | undefined)[]): categorySet is string[][] {
   return !categorySet.some((set) => !set || set.length === 0);
 }
+
+const IMAGE_WIDTH = 96;
+const IMAGE_HEIGHT = 96;
 
 const command: Command = {
   name: name, // admin
@@ -129,23 +133,29 @@ const command: Command = {
 
     // Run the icon downloads asynchronously
     const iconURLs = await Promise.all(
-      subset.map((card) => {
+      subset.map(async (card) => {
         if (!card.imgFile) return undefined;
 
-        return Wiki.getImageURL(card.imgFile).then((url) => (url ? loadImage(url) : undefined));
+        const url = await Wiki.getImageURL(card.imgFile);
+        console.log('iconURL url', url);
+
+        if (!url) return undefined;
+
+        const imgBuffer = await ImageCache.get(url);
+        return loadImage(imgBuffer);
       }),
     );
     const icons = iconURLs.filter((img) => img !== undefined) as Image[];
 
-    const height = Math.ceil(icons.length / 5) * icons[0].height;
-    const width = icons[0].width * 5;
+    const height = Math.ceil(icons.length / 5) * IMAGE_HEIGHT;
+    const width = IMAGE_WIDTH * 5;
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
 
     for (let i = 0; i < icons.length; i++) {
-      const x = (i % 5) * icons[i].width;
-      const y = Math.floor(i / 5) * icons[i].height;
-      ctx.drawImage(icons[i], x, y);
+      const x = (i % 5) * IMAGE_WIDTH;
+      const y = Math.floor(i / 5) * IMAGE_HEIGHT;
+      ctx.drawImage(icons[i], x, y, 96, 96);
     }
 
     const buffer = canvas.toBuffer();

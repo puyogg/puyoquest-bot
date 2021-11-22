@@ -4,6 +4,10 @@ import { IndexData, Wiki } from '../wiki/api';
 import { createCanvas, loadImage, Image } from 'canvas';
 import { CacheMap } from '../helper/cache-map';
 import * as path from 'path';
+import { ImageCache } from '../wiki/image-cache';
+
+const ICON_WIDTH = 96;
+const ICON_HEIGHT = 96;
 
 class TenRoll {
   private message: Discord.Message;
@@ -142,7 +146,8 @@ class TenRoll {
       return;
     }
 
-    const icon = await loadImage(iconURL);
+    const iconBuffer = await ImageCache.get(iconURL);
+    const icon = await loadImage(iconBuffer);
     return icon;
   }
 
@@ -150,15 +155,21 @@ class TenRoll {
     const template = await loadImage(path.resolve(__dirname, '../images/ten_roll_template.jpg'));
     const NEW = await loadImage(path.resolve(__dirname, '../images/new.png'));
     const icons: Image[] = [];
-    let error = 0;
+    // let error = 0;
+    // while (icons.length < 10) {
+    //   const icon = await this.getRandomIcon();
+    //   if (!icon) {
+    //     error++;
+    //   } else {
+    //     icons.push(icon);
+    //   }
+    //   if (error >= 10) return;
+    // }
+
     while (icons.length < 10) {
-      const icon = await this.getRandomIcon();
-      if (!icon) {
-        error++;
-      } else {
-        icons.push(icon);
-      }
-      if (error >= 10) return;
+      const batch = Array.from({ length: 10 }, () => this.getRandomIcon());
+      const randomIcons = (await Promise.all(batch)).filter((icon) => !!icon) as Image[];
+      icons.push(...randomIcons);
     }
 
     const canvas = createCanvas(600, 570);
@@ -168,14 +179,14 @@ class TenRoll {
     ctx.drawImage(template, 0, 0);
 
     for (let i = 0; i < 5; i++) {
-      ctx.drawImage(icons[i], 30 + 111 * i, 153);
+      ctx.drawImage(icons[i], 30 + 111 * i, 153, ICON_WIDTH, ICON_HEIGHT);
       if (Math.floor(Math.random() * 4) === 0) {
         ctx.drawImage(NEW, 23 + 111 * i, 125);
       }
     }
 
     for (let i = 5; i < 10; i++) {
-      ctx.drawImage(icons[i], 30 + 111 * (i - 5), 273);
+      ctx.drawImage(icons[i], 30 + 111 * (i - 5), 273, ICON_WIDTH, ICON_HEIGHT);
       if (Math.floor(Math.random() * 4) === 0) {
         ctx.drawImage(NEW, 23 + 111 * (i - 5), 245);
       }

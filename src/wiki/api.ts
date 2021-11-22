@@ -460,6 +460,7 @@ class Wiki {
     ];
 
     const cardIndex: IndexData[] = [];
+    const nameSet: Set<string> = new Set();
     for (const url of indexPage) {
       const page = await fetch(`${url}?action=raw&templates=expand`)
         .then((res) => {
@@ -478,9 +479,9 @@ class Wiki {
         .filter((row) => row.startsWith('| [[File:'))
         .map((row) => {
           const idMatch = row.match(/\[\[File:Img(.*?).png/);
-          const nameMatch = row.match(/}}}\|(.*?)\|link=/);
+          const nameMatch = row.match(/96px\|(.*?)\|link=/);
           const linkNameMatch = row.match(/\|link=PPQ:(.*?)]]/);
-          const imgFileMatch = row.match(/\[\[(.*?)\|{{{/);
+          const imgFileMatch = row.match(/\[\[(.*?)\|96px/);
           const jpNameMatch = row.match(/\"ja\">(.*?)<\/span>/);
           const indexData: IndexData = {
             id: idMatch && idMatch[1].slice(0, 4),
@@ -500,13 +501,14 @@ class Wiki {
           return indexData;
         });
 
-      for (let i = 0; i < chars.length; i++) {
-        while (chars.slice(i + 1).findIndex((char) => char.name === chars[i].name) !== -1) {
-          chars.splice(i + 1, 1);
+      for (const char of chars) {
+        if (!char.linkName) continue;
+
+        if (!nameSet.has(char.linkName)) {
+          nameSet.add(char.linkName);
+          cardIndex.push(char);
         }
       }
-
-      cardIndex.push(...chars);
     }
 
     Wiki.buildCardIndexFromCache(cardIndex);

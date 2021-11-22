@@ -34,14 +34,11 @@ async function initCron(): Promise<void> {
 
     // await Wiki.buildCardIndex();
     // try {
-    //   fs.writeFileSync('./index-cache.json', JSON.stringify(Wiki.cardIndex));
+    //   fs.writeFileSync('./src/index-cache.json', JSON.stringify(Wiki.cardIndex));
     //   console.log('Wrote cache to file.');
     // } catch (e) {
     //   console.error(e);
     // }
-
-    // const guilds = await News.listGuilds();
-    // console.log(guilds);
   }
 }
 
